@@ -1,0 +1,57 @@
+<div class="row mt-4">
+  <h5 class="center-align">Add Prefix</h5>
+  <form action="/prefixes/add" method="POST" class="col s12 ml-3 mr-3" id="addPrefixForm">
+    <div class="row">
+      <div class="col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <label class="formLabel">Type:</label>
+        <br>
+        <label for="static">
+          <input type="radio" class="with-gap" id="static" name="type" value="static" {{#if static}} checked {{/if}}>
+          <span>Static</span>
+        </label>
+        <br>
+        <label for="dhcp">
+          <input type="radio" class="with-gap" id="dhcp" name="type" value="dhcp" {{#if dhcp}} checked {{/if}}>
+          <span>DHCP</span>
+        </label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="prefix" id="prefix" data-length="50" value="{{prefix}}" required>
+        <label for="prefix">Prefix/CIDR</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="name" id="name" data-length="50" value="{{name}}" required>
+        <label for="name">Name</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="description" id="description" data-length="50" value="{{description}}">
+        <label for="description">Description</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="gateway" id="gateway" data-length="50" value="{{gateway}}" required>
+        <label for="gateway">Gateway IP</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="subnet" id="subnet" data-length="50" value="{{subnet}}" required>
+        <label for="subnet">Subnet Mask</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="system" id="system" data-length="50" value="{{system}}">
+        <label for="system">System - Ex, E7-2 E7-20 if needed</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="site" id="site" class="autocomplete" value="{{site}}">
+        <label for="site">Site</label>
+      </div>
+    </div>
+    <div class="center-align mb-5">
+      <button class="btn" type="submit" name="addSite">Add</button>
+    </div>
+  </form>
+</div>

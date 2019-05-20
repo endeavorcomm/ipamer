@@ -1,0 +1,23 @@
+{
+  "name": "iSP",
+  "version": "0.0.1",
+  "description": "iPAM for Service Providers",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jason Creviston",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "1.19.0",
+    "connect-flash": "0.1.1",
+    "connect-mongodb-session": "2.1.1",
+    "cookie-parser": "1.4.4",
+    "express": "4.16.4",
+    "express-handlebars": "3.0.2",
+    "express-session": "1.16.1",
+    "method-override": "3.0.0",
+    "mongoose": "5.5.4",
+    "serialize-javascript": "1.7.0"
+  }
+}
