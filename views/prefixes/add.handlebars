@@ -2,8 +2,8 @@
   <h5 class="center-align">Add Prefix</h5>
   <form action="/prefixes/add" method="POST" class="col s12 ml-3 mr-3" id="addPrefixForm">
     <div class="row">
-      <div class="col s8 offset-s2 m6 offset-m3 l3 offset-l3">
-        <label class="formLabel">Type:</label>
+      <div class="col s8 offset-s2 m3 offset-m3 l1 offset-l3">
+        <label class="formLabel">Type*:</label>
         <br>
         <label for="static">
           <input type="radio" class="with-gap" id="static" name="type" value="static" {{#if static}} checked {{/if}}>
@@ -15,15 +15,22 @@
           <span>DHCP</span>
         </label>
       </div>
+      <div class="col s8 offset-s2 m3 l2">
+        <br>
+        <label for="createAddresses">
+          <input type="checkbox" id="createAddresses" name="createAddresses" {{#if createAddresses}} checked {{/if}}>
+          <span>Create IP Addresses</span>
+        </label>
+      </div>
       <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
         <input type="text" name="prefix" id="prefix" data-length="50" value="{{prefix}}" required>
-        <label for="prefix">Prefix/CIDR</label>
+        <label for="prefix">Prefix/CIDR*</label>
       </div>
     </div>
     <div class="row">
       <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
         <input type="text" name="name" id="name" data-length="50" value="{{name}}" required>
-        <label for="name">Name</label>
+        <label for="name">Name*</label>
       </div>
       <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
         <input type="text" name="description" id="description" data-length="50" value="{{description}}">
@@ -33,10 +40,10 @@
     <div class="row">
       <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
         <input type="text" name="gateway" id="gateway" data-length="50" value="{{gateway}}" required>
-        <label for="gateway">Gateway IP</label>
+        <label for="gateway">Gateway IP*</label>
       </div>
       <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
-        <input type="text" name="subnet" id="subnet" data-length="50" value="{{subnet}}" required>
+        <input type="text" name="subnet" id="subnet" data-length="50" value="{{subnet}}">
         <label for="subnet">Subnet Mask</label>
       </div>
     </div>
@@ -51,7 +58,7 @@
       </div>
     </div>
     <div class="center-align mb-5">
-      <button class="btn" type="submit" name="addSite">Add</button>
+      <button class="btn" type="submit" name="addSite" id="addSite">Add</button>
     </div>
   </form>
 </div>

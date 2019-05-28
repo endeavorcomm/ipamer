@@ -18,7 +18,7 @@ const PrefixSchema = new Schema({
   },
   subnet: {
     type: String,
-    required: true
+    required: false
   },
   gateway: {
     type: String,

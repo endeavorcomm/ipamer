@@ -8,6 +8,10 @@ const AddressSchema = new Schema({
     type: String,
     required: true
   },
+  type: {
+    type: String,
+    required: false
+  },
   customer: {
     type: String,
     required: false
@@ -22,7 +26,7 @@ const AddressSchema = new Schema({
   },
   subnet: {
     type: String,
-    required: true
+    required: false
   },
   site: {
     type: String,

@@ -39,4 +39,26 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   }
+
+  const info_msg = document.getElementById('info_msg');
+  const form_prefix = document.getElementById('prefix');
+  const form_name = document.getElementById('name');
+  const form_gateway = document.getElementById('gateway');
+  const form_subnet = document.getElementById('subnet');
+  const success_msg = document.getElementById('success_msg');
+  const error_msg = document.getElementById('error_msg');
+  document.getElementById('addSite').addEventListener('click', () => {
+    if (form_prefix.value !== '' && form_name.value !== '' && form_gateway.value !== '') {
+      if (success_msg) {
+        success_msg.style.display = 'none';
+        success_msg.innerHTML = '';
+      }
+      if (error_msg) {
+        error_msg.style.display = 'none';
+        error_msg.innerHTML = '';
+      }
+      info_msg.innerHTML = 'Creating ...';
+      info_msg.style.display = 'block';
+    }
+  })
 });

@@ -1,7 +1,9 @@
 {{#if success_msg}}
-  <div class="alert alert-success center-align">{{success_msg}}</div>
+  <div class="alert alert-success center-align" id="success_msg">{{success_msg}}</div>
 {{/if}}
 
+<div class="alert alert-primary center-align" id="info_msg"></div>
+
 {{#if error_msg}}
-  <div class="alert alert-danger center-align">{{error_msg}}</div>
+  <div class="alert alert-danger center-align" id="error_msg">{{error_msg}}</div>
 {{/if}}

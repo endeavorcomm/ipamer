@@ -11,6 +11,11 @@
   background-color: #f8d7da;
   border-color: #f5c6cb;
 }
+.alert-primary {
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #b8daff;
+}
 .alert-success {
   color: #155724;
   background-color: #d4edda;
@@ -76,6 +81,10 @@
 }
 
 #butInstall {
+  display: none;
+}
+
+#info_msg {
   display: none;
 }
 
