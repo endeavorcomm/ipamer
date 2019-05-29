@@ -96,6 +96,14 @@ app.get('/getPrefixes', (req, res) => {
   });
 });
 
+app.get('/findPrefix', (req, res) => {
+  const pre = req.query.prefix;
+  Prefix.findOne({prefix: pre}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})
+  .then(prefixes => {
+    res.send(prefixes);
+  });
+});
+
 // load routes
 const sites = require('./routes/sites');
 const prefixes = require('./routes/prefixes');

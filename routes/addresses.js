@@ -19,6 +19,9 @@ router.get('/add', (req, res) => {
   res.render('addresses/add');
 });
 
+// process address creation form
+router.post('/add', (req, res) => {
 
+});
 
 module.exports = router;
