@@ -1,0 +1,39 @@
+<div class="row mt-4">
+  <h5 class="center-align">Add Address</h5>
+  <form action="/addresses/add" method="POST" class="col s12 ml-3 mr-3" id="addAddressForm">
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m3 offset-m3 l3 offset-l3">
+        <input type="text" name="prefix" id="address-prefix" data-length="50" class="autocomplete" value="{{prefix}}" autofocus required>
+        <label for="address-prefix">Prefix/CIDR*</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="address" id="address-address" data-length="50" value="{{address}}" required>
+        <label for="address-address">IP Address*</label>
+      </div>
+    </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="customer" id="address-name" data-length="50" value="{{customer}}">
+        <label for="address-customer">Customer</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="subnet" id="address-subnet" data-length="50" value="{{subnet}}" disabled>
+        <label for="address-subnet">Subnet</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="gateway" id="address-gateway" data-length="50" value="{{gateway}}" disabled>
+        <label for="address-gateway">Gateway IP</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="site" id="address-site" data-length="50" value="{{site}}" disabled>
+        <label for="address-site">Site</label>
+      </div>
+    </div>
+    <div class="center-align mb-5">
+      <button class="btn" type="submit" name="addAddress" id="addAddress">Add</button>
+    </div>
+  </form>
+</div>

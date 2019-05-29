@@ -380,14 +380,14 @@ router.post('/add', (req, res) => {
     });
 
     newPrefix.save()
+      // .then(prefix => {
+      //   // send success message
+      //   if (createAddresses == undefined) {
+      //     req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+      //     res.redirect('/prefixes/add');
+      //   }
+      // })
       .then(prefix => {
-        // send success message
-        if (createAddresses == undefined) {
-          req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
-          res.redirect('/prefixes/add');
-        }
-      })
-      .then( () => {
         // check if we should create addresses
         if (createAddresses !== undefined) {
           // yes, create addresses
@@ -468,7 +468,7 @@ router.post('/add', (req, res) => {
                 }
                 // TODO toaster notification for IP address creation
                 // send success message
-                req.flash('success_msg', `Prefix and IP Addresses added!`);
+                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
                 res.redirect('/prefixes/add');
                 break;
               case 2:
@@ -516,7 +516,7 @@ router.post('/add', (req, res) => {
                 }
                 // TODO toaster notification for IP address creation
                 // send success message
-                req.flash('success_msg', `Prefix and IP Addresses added!`);
+                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
                 res.redirect('/prefixes/add');
                 break;
               case 3:
@@ -568,7 +568,7 @@ router.post('/add', (req, res) => {
                   }
                 }
                 // send success message
-                req.flash('success_msg', `Prefix and IP Addresses added!`);
+                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
                 res.redirect('/prefixes/add');
                 break;
               case 4:
@@ -625,18 +625,214 @@ router.post('/add', (req, res) => {
                 }
                 // TODO toaster notification for IP address creation
                 // send success message
-                req.flash('success_msg', `Prefix and IP Addresses added!`);
+                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
                 res.redirect('/prefixes/add');
                 break;
             }
           }
         } else {
-          // IP address creation not requested
+          // IP address creation not requested, but create Network and Broadcast address
+
+          // check if prefix is IPv6 or IPv4
+          const v6 = req.body.prefix.includes("::");
+          const v4 = req.body.prefix.includes(".");
+          if (v6) {
+            // do not create addresses for IPv6
+            // TODO toaster notification for non-creation
+          } else if (v4) {
+
+            // get CIDR from prefix and convert to subnet mask
+            const prefixCIDR = getCIDR(req.body.prefix);
+            let sMask = convertCIDRToSubnet(prefixCIDR);
+
+            // create subnet array
+            let subnetArray = sMask.split(".");
+
+            // create array of non-255 subnet mask values
+            let maskArray = [];
+            subnetArray.forEach((maskOctet) => {
+              if (maskOctet !== '255') {
+                maskArray.push(maskOctet);
+              }
+            })
+
+            // get network address from prefix
+            let initPrefix = req.body.prefix;
+            let netOctets = getNetwork(initPrefix);
+
+            switch(maskArray.length) {
+              case 1:
+                // octet four is non-255
+                let octetFourLength1 = 256 - parseInt(maskArray[0]) - 1;
+                for (n = 0; n <= octetFourLength1; n++) {
+                  let octetFourValue1 = parseInt(netOctets[3]) + n;
+                  let ip1 = `${netOctets[0]}.${netOctets[1]}.${netOctets[2]}.${octetFourValue1}`;
+                  // add IP address into database
+                  if (n == 0) {
+                    // address is first in list, so it is the network address
+                    let newAddress = new Address({
+                      ip: ip1,
+                      type: 'Network',
+                      prefix: req.body.prefix,
+                      gateway: req.body.gateway,
+                      customer: '',
+                      subnet: sMask,
+                      site: req.body.site
+                    });
+                    newAddress.save();
+                  } else if (n == octetFourLength1) {
+                    // address is last in list, so it is the broadcast address
+                    let newAddress = new Address({
+                      ip: ip1,
+                      type: 'Broadcast',
+                      prefix: req.body.prefix,
+                      gateway: req.body.gateway,
+                      customer: '',
+                      subnet: sMask,
+                      site: req.body.site
+                    });
+                    newAddress.save();
+                  }
+                }
+                // TODO toaster notification for IP address creation
+                // send success message
+                req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+                res.redirect('/prefixes/add');
+                break;
+              case 2:
+                // octet three and four is non-255
+                let octetThreeLength2 = 256 - parseInt(maskArray[0]) - 1;
+                let octetFourLength2 = 256 - parseInt(maskArray[1]) - 1;
+                for (n = 0; n <= octetThreeLength2; n++) {
+                  let octetThreeValue2 = parseInt(netOctets[2]) + n;
+                  for (nn = 0; nn <= octetFourLength2; nn++) {
+                    let octetFourValue2 = parseInt(netOctets[3]) + nn;
+                    let ip2 = `${netOctets[0]}.${netOctets[1]}.${octetThreeValue2}.${octetFourValue2}`;
+                    // add IP address into database
+                    if (n == 0 && nn == 0) {
+                      new Address({
+                        ip: ip2,
+                        type: 'Network',
+                        prefix: req.body.prefix,
+                        gateway: req.body.gateway,
+                        customer: '',
+                        subnet: sMask,
+                        site: req.body.site
+                      });
+                    } else if (n == octetThreeLength2 && nn == octetFourLength2) {
+                      new Address({
+                        ip: ip2,
+                        type: 'Broadcast',
+                        prefix: req.body.prefix,
+                        gateway: req.body.gateway,
+                        customer: '',
+                        subnet: sMask,
+                        site: req.body.site
+                      });
+                    }
+                  }
+                }
+                // TODO toaster notification for IP address creation
+                // send success message
+                req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+                res.redirect('/prefixes/add');
+                break;
+              case 3:
+                // octet two, three and four is non-255
+                let octetTwoLength3 = 256 - parseInt(maskArray[0]) - 1;
+                let octetThreeLength3 = 256 - parseInt(maskArray[1]) - 1;
+                let octetFourLength3 = 256 - parseInt(maskArray[2]) - 1;
+                for (n = 0; n <= octetTwoLength3; n++) {
+                  let octetTwoValue3 = parseInt(netOctets[1]) + n;
+                  for (nn = 0; nn <= octetThreeLength3; nn++) {
+                    let octetThreeValue3 = parseInt(netOctets[2]) + nn;
+                    for (nnn = 0; nnn <= octetFourLength3; nnn++) {
+                      let octetFourValue3 = parseInt(netOctets[3]) + nnn;
+                      let ip3 = `${netOctets[0]}.${octetTwoValue3}.${octetThreeValue3}.${octetFourValue3}`;
+                      // add IP address into database
+                      if (n == 0 && nn == 0 && nnn == 0) {
+                        new Address({
+                          ip: ip3,
+                          type: 'Network',
+                          prefix: req.body.prefix,
+                          gateway: req.body.gateway,
+                          customer: '',
+                          subnet: sMask,
+                          site: req.body.site
+                        });
+                      }
+                      if (n == octetTwoLength3 && nn == octetThreeLength3 && nnn == octetFourLength3) {
+                        new Address({
+                          ip: ip3,
+                          type: 'Broadcast',
+                          prefix: req.body.prefix,
+                          gateway: req.body.gateway,
+                          customer: '',
+                          subnet: sMask,
+                          site: req.body.site
+                        });
+                      }
+                    }
+                  }
+                }
+                // send success message
+                req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+                res.redirect('/prefixes/add');
+                break;
+              case 4:
+                // all octets are non-255
+                console.log('All octets are non-255');
+                let octetOneLength4 = 256 - parseInt(maskArray[0]) - 1;
+                let octetTwoLength4 = 256 - parseInt(maskArray[1]) - 1;
+                let octetThreeLength4 = 256 - parseInt(maskArray[2]) - 1;
+                let octetFourLength4 = 256 - parseInt(maskArray[3]) - 1;
+                for (n = 0; n <= octetOneLength4; n++) {
+                  let octetOneValue4 = parseInt(netOctets[0]) + n;
+                  for (nn = 0; nn <= octetTwoLength4; nn++) {
+                    let octetTwoValue4 = parseInt(netOctets[1]) + nn;
+                    for (nnn = 0; nnn <= octetThreeLength4; nnn++) {
+                      let octetThreeValue4 = parseInt(netOctets[2]) + nnn;
+                      for (nnnn = 0; nnnn <= octetFourLength4; nnnn++) {
+                        let octetFourValue4 = parseInt(netOctets[3]) + nnnn;
+                        let ip4 = `${octetOneValue4}.${octetTwoValue4}.${octetThreeValue4}.${octetFourValue4}`;
+                        // add IP address into database
+                        if (n == 0 && nn == 0 && nnn == 0 && nnnn == 0) {
+                          new Address({
+                            ip: ip4,
+                            type: 'Network',
+                            prefix: req.body.prefix,
+                            gateway: req.body.gateway,
+                            customer: '',
+                            subnet: sMask,
+                            site: req.body.site
+                          });
+                        } else if (n == octetOneLength4 && nn == octetTwoLength4 && nnn == octetThreeLength4 && nnnn == octetFourLength4) {
+                          new Address({
+                            ip: ip4,
+                            type: 'Broadcast',
+                            prefix: req.body.prefix,
+                            gateway: req.body.gateway,
+                            customer: '',
+                            subnet: sMask,
+                            site: req.body.site
+                          });
+                        }
+                      }
+                    }
+                  }
+                }
+                // TODO toaster notification for IP address creation
+                // send success message
+                req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+                res.redirect('/prefixes/add');
+                break;
+            }
+          }
         }
       })
       .catch(err => {
         req.flash('error_msg', `Failed to add prefix. Error is ${err}`);
-        res.render('/prefixes/add');
+        res.render('prefixes/add');
         return;
       });
   }

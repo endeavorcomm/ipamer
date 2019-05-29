@@ -10,7 +10,7 @@ const AddressSchema = new Schema({
   },
   type: {
     type: String,
-    required: false
+    required: true
   },
   customer: {
     type: String,

@@ -33,6 +33,10 @@ const store = new MongoDBStore({
 require('./models/Site');
 const Site = mongoose.model('sites');
 
+// load prefix model
+require('./models/Prefix');
+const Prefix = mongoose.model('prefixes');
+
 // MongoDBStore Middleware
 store.on('error', function(error) {
   console.log(error);
@@ -85,13 +89,22 @@ app.get('/getSites', (req, res) => {
   });
 });
 
+app.get('/getPrefixes', (req, res) => {
+  Prefix.find({}, {prefix: 3, _id: 0})
+  .then(prefixes => {
+    res.send(prefixes);
+  });
+});
+
 // load routes
 const sites = require('./routes/sites');
 const prefixes = require('./routes/prefixes');
+const addresses = require('./routes/addresses');
 
 // use routers
 app.use('/sites', sites);
 app.use('/prefixes', prefixes);
+app.use('/addresses', addresses);
 
 server.listen(80, () => {
   console.log('Server Listening on Port 80...')
