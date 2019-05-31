@@ -29,13 +29,17 @@ const store = new MongoDBStore({
   collection: 'sessions'
 });
 
-// load site model
-require('./models/Site');
-const Site = mongoose.model('sites');
+// load customer model
+require('./models/Customer');
+const Customer = mongoose.model('customers');
 
 // load prefix model
 require('./models/Prefix');
 const Prefix = mongoose.model('prefixes');
+
+// load site model
+require('./models/Site');
+const Site = mongoose.model('sites');
 
 // MongoDBStore Middleware
 store.on('error', function(error) {
@@ -82,10 +86,18 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/getSites', (req, res) => {
-  Site.find({}, {name: 1, _id: 0})
-  .then(sites => {
-    res.send(sites);
+app.get('/findPrefix', (req, res) => {
+  const pre = req.query.prefix;
+  Prefix.findOne({prefix: pre}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})
+  .then(prefix => {
+    res.send(prefix);
+  });
+});
+
+app.get('/getCustomers', (req, res) => {
+  Customer.find({}, {name: 1, _id: 0})
+  .then(customers => {
+    res.send(customers);
   });
 });
 
@@ -96,11 +108,10 @@ app.get('/getPrefixes', (req, res) => {
   });
 });
 
-app.get('/findPrefix', (req, res) => {
-  const pre = req.query.prefix;
-  Prefix.findOne({prefix: pre}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})
-  .then(prefixes => {
-    res.send(prefixes);
+app.get('/getSites', (req, res) => {
+  Site.find({}, {name: 1, _id: 0})
+  .then(sites => {
+    res.send(sites);
   });
 });
 

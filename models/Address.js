@@ -32,6 +32,10 @@ const AddressSchema = new Schema({
     type: String,
     required: false
   },
+  description: {
+    type: String,
+    required: false
+  },
   date: {
     type: Date,
     default: Date.now
