@@ -8,4 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var mobileNav = document.querySelectorAll('.sidenav');
   M.Sidenav.init(mobileNav);
 
+  // give search field focus on page load
+  document.getElementById('nav-search').focus();
 });

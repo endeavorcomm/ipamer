@@ -9,6 +9,17 @@ router.get('/add', (req, res) => {
   res.render('sites/add');
 });
 
+// site status route
+router.get('/status', (req, res) => {
+  // query sites
+  Site.find({}, {prefixes: 1, name: 2, description: 3, alias: 4, _id: 0}).sort({name: 1})
+    .then(sites => {
+      res.render('sites/status', {
+        site: sites
+      });
+    });
+})
+
 // process site creation form
 router.post('/add', (req, res) => {
   let name = req.body.name;

@@ -12,6 +12,17 @@ router.get('/add', (req, res) => {
   res.render('customers/add');
 });
 
+// customer status route
+router.get('/status', (req, res) => {
+  // query customers
+  Customer.find({}, {name: 2, description: 3, addresses: 1, _id: 0}).sort({name: 1})
+    .then(customers => {
+      res.render('customers/status', {
+        customer: customers
+      });
+    });
+})
+
 // process address creation form
 router.post('/add', (req, res) => {
   const name = req.body.name;

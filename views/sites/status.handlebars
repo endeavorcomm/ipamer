@@ -1,0 +1,21 @@
+<div class="row mt-4">
+  <div class="col s12">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Alias</th>
+          <th>Description</th>
+          <th>Prefixes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each site}}
+        <tr>
+          <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{this.prefixes}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

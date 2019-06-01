@@ -16,6 +16,17 @@ router.get('/add', (req, res) => {
   res.render('prefixes/add');
 });
 
+// prefix status route
+router.get('/status', (req, res) => {
+  // query prefixes
+  Prefix.find({}, {}).sort({name: 1})
+    .then(prefixes => {
+      res.render('prefixes/status', {
+        prefix: prefixes
+      });
+    });
+})
+
 // process prefix creation form
 router.post('/add', (req, res) => {
   const prefix = req.body.prefix;
@@ -426,6 +437,18 @@ router.post('/add', (req, res) => {
 
     newPrefix.save()
       .then(prefix => {
+        // check if site was assigned
+        if (site !== "") {
+          // assign IP address to customer
+          Site.updateOne({name: site}, {$push: {prefixes: prefix.prefix}}, (err, record) => {
+            if (err) {
+              throw err;
+            } else {
+              // site updated with prefix!
+            }
+          });
+        }
+        
         // check if we should create addresses
         if (createAddresses !== undefined) {
           // yes, create addresses

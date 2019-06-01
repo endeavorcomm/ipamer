@@ -1,0 +1,23 @@
+<div class="row mt-4">
+  <div class="col s12">
+    <table>
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Site</th>
+          <th>Customer</th>
+          <th>Subnet</th>
+          <th>Gateway</th>
+          <th>Prefix</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each address}}
+        <tr>
+          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>

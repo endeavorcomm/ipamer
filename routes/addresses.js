@@ -19,6 +19,28 @@ router.get('/add', (req, res) => {
   res.render('addresses/add');
 });
 
+// address status route
+router.get('/status', (req, res) => {
+  // TODO finish pagination work
+  // get count of addresses for pagination
+  // Address.countDocuments({type: 'Unicast'}, (err, count) => {
+  //   if (err) throw err;
+  //   const numResults = count;
+  //   // get estimated number of pages for pagination
+  //   const est = numResults / 30;
+  //   // round up to the nearest integer
+  //   const pages = Math.ceil(est);
+  // });
+  
+  // query addresses
+  Address.find({type: 'Unicast'}, {}).sort({ip: 1})
+    .then(addresses => {
+      res.render('addresses/status', {
+        address: addresses
+      });
+    });
+})
+
 // process address creation form
 router.post('/add', (req, res) => {
   const prefix = req.body.prefix;
