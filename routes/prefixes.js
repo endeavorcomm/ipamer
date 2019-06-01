@@ -1,19 +1,15 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 const ip = require('ip');
 
 // load prefix model
-require('../models/Prefix');
-const Prefix = mongoose.model('prefixes');
+Prefix = require('../models/Prefix');
 
 // load site model
-require('../models/Site');
-const Site = mongoose.model('sites');
+Site = require('../models/Site');
 
 // load address model
-require('../models/Address');
-const Address = mongoose.model('addresses');
+Address = require('../models/Address');
 
 // add prefix route
 router.get('/add', (req, res) => {

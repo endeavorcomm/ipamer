@@ -1,14 +1,11 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 
 // load customer model
-require('../models/Customer');
-const Customer = mongoose.model('customers');
+Customer = require('../models/Customer');
 
 // load address model
-require('../models/Address');
-const Address = mongoose.model('addresses');
+Address = require('../models/Address');
 
 // add customer route
 router.get('/add', (req, res) => {

@@ -42,4 +42,9 @@ const PrefixSchema = new Schema({
   }
 });
 
-mongoose.model('prefixes', PrefixSchema);
+let Prefix = module.exports = mongoose.model('prefixes', PrefixSchema);
+
+// get customers
+module.exports.getPrefixes = (callback, limit) => {
+  Prefix.find(callback).limit(limit);
+}

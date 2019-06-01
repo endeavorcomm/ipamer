@@ -55,7 +55,6 @@ app.engine('handlebars', exphbs({defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
 // BodyParser Middleware
-const jsonParser = bodyParser.json()
 app.use(bodyParser.urlencoded({
   extended: false
 }));
@@ -121,12 +120,14 @@ app.get('/getSites', (req, res) => {
 
 // load routes
 const addresses = require('./routes/addresses');
+const api = require('./routes/api');
 const customers = require('./routes/customers');
 const prefixes = require('./routes/prefixes');
 const sites = require('./routes/sites');
 
 // use routers
 app.use('/addresses', addresses);
+app.use('/api', api);
 app.use('/customers', customers);
 app.use('/prefixes', prefixes);
 app.use('/sites', sites);

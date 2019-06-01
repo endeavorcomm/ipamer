@@ -1,10 +1,8 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 
 // load site model
-require('../models/Site');
-const Site = mongoose.model('sites');
+Site = require('../models/Site');
 
 // add site route
 router.get('/add', (req, res) => {
