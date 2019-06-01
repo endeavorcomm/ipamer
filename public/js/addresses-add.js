@@ -1,6 +1,21 @@
-//import { request } from "http";
-
 document.addEventListener('DOMContentLoaded', function() {
+  // if this page loaded because of a form error, fill in values
+  // get prefix field value, to evaluate
+  var prefix = document.getElementById('address-prefix').value;
+  if (prefix !== "") {
+    // get any subnet and site value as well
+    const addressSubnet = document.getElementById('address-subnet');
+    const addressSite = document.getElementById('address-site');
+    
+    // if they don't exist, enable form fields
+    if (addressSubnet == "") {
+      addressSubnet.style.disabled = false;
+    }
+    if (addressSite == "") {
+      addressSite.style.disabled = false;
+    }
+  }
+
   document.getElementById('address-customer').addEventListener('change', () => {
     // set focus on next field
     document.getElementById('address-description').focus();
@@ -72,15 +87,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // initialize address-add site field autocomplete
+  var siteAuto = document.getElementById('address-site');
+  M.Autocomplete.init(siteAuto);
+
+  // create ajax request and get a list of customer names when adding an IP address
+  var xhrSite = new XMLHttpRequest();
+  xhrSite.open('GET', 'http://localhost/getSites', true);
+  xhrSite.send();
+  xhrSite.onreadystatechange = () => {
+    if (xhrSite.readyState === 4) {
+      if (xhrSite.status === 200) {
+        // convert response string into an object
+        var responseSites = JSON.parse(xhrSite.responseText);
+
+        // manipulate object data into usable format for autocomplete
+        var sites = {};
+        for (var i=0; i<responseSites.length; i++) {
+          // take site string and convert it to a key, with null as the value
+          sites[responseSites[i].name] = null;
+        }
+
+        // update autocomplete data
+        let siteInstance = M.Autocomplete.getInstance(siteAuto);
+        siteInstance.updateData(sites);
+      } else {
+        console.log('Error with ajax request');
+      }
+    }
+  }
+
   document.getElementById('address-prefix').addEventListener('change', () => {
     // when Prefix/CIDR field is changed, fill in Subnet, Gateway and Site if available
 
+    // get prefix field value
+    var prefix = document.getElementById('address-prefix').value;
+    checkPrefix(prefix);
+  });
+
+  function checkPrefix(prefix) {
     // define regular expressions for validating prefix
     const v4PreRE = /((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])(\/([1-9]|[1-2][0-9]|3[0-1]))?$/;
     const v6PreRE = /(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/;
-    
-    // get prefix field value
-    var prefix = document.getElementById('address-prefix').value;
 
     const prefixIsValid = validatePrefix(prefix);
 
@@ -187,8 +235,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // set focus on next field
         document.getElementById('address-prefix').focus();
       }
-    } else {
-      // prefix is invalid
     }
-  });
+  }
 });

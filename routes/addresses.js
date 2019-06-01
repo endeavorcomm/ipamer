@@ -15,6 +15,10 @@ const Site = mongoose.model('sites');
 require('../models/Address');
 const Address = mongoose.model('addresses');
 
+// load customer model
+require('../models/Customer');
+const Customer = mongoose.model('customers');
+
 // add prefix route
 router.get('/add', (req, res) => {
   res.render('addresses/add');
@@ -24,6 +28,13 @@ router.get('/add', (req, res) => {
 router.post('/add', (req, res) => {
   const prefix = req.body.prefix;
   const address = req.body.address;
+  const customer = req.body.customer;
+  let customerIsValid = true;
+
+  // validate prefix
+  const prefixIsValid = validatePrefix(prefix);
+
+  if (prefixIsValid) {
 
   // get values for site, subnet and gateway from database, because if the form fields are disabled, they won't be submitted in the post
   Prefix.findOne({prefix: prefix}, {gateway: 4, subnet: 5, site: 8})
@@ -47,15 +58,38 @@ router.post('/add', (req, res) => {
       // ##### BEGIN ADDRESS FORM PROCESSING #####
       const addressIsValid = validateAddress(address, prefix);
       const siteIsValid = validateSite();
-      const customerIsValid = validateCustomer();
+      if (customer !== "") {
+        customerIsValid = validateCustomer(customer);
+      }
       const cidrSubnetMatches = validateCIDRMatches(subnet);
 
       if (addressIsValid && siteIsValid && customerIsValid && cidrSubnetMatches) {  
         createAddress(gateway, subnet, site);
       }
 
-      function validateCustomer() {
-        return true;
+      function validateCustomer(customer) {
+        // TODO check if customer exists, if not send error
+        const customerExists = Customer.findOne({name: customer}, {_id: 0})
+          .then((customerFound) => {
+            if (customerFound) {
+              return true;
+            } else {
+              let message = 'Customer doesn\'t exist';
+              // send response
+              res.render('addresses/add', {
+                error_msg: message,
+                prefix: req.body.prefix,
+                address: req.body.address,
+                customer: req.body.customer,
+                gateway: gateway,
+                subnet: subnet,
+                site: site,
+                description: req.body.description
+              });
+              return false;
+            }
+          });
+        return customerExists;
       }
 
       function validateAddress(address, prefix) {
@@ -63,7 +97,7 @@ router.post('/add', (req, res) => {
         let addressMember = false;
       
         if ( !(v4AddrRE.test(address) || v6AddrRE.test(address)) ) {
-          // address is invalid, don't change value of addressValid
+          // address is invalid, keep addressValid = false
         } else {
           // address is valid IP address, continue testing
           addressValid = true;
@@ -72,12 +106,14 @@ router.post('/add', (req, res) => {
           if (ip.cidrSubnet(prefix).contains(address)) {
             // ip address is part of prefix
             addressMember = true;
+          } else {
+            // address is not a member of prefix, keep addressMember = false
           }
         }
         if (!addressValid) {
           // invalid address given
           let message = 'Not a valid IPv4 or IPv6 Address';
-          // send response and set checked for dhcp radio button
+          // send response
           res.render('addresses/add', {
             error_msg: message,
             prefix: req.body.prefix,
@@ -92,7 +128,7 @@ router.post('/add', (req, res) => {
         } else if (!addressMember) {
           // ip address not member of prefix
           let message = 'IP Address is not a member of Prefix';
-          // send response and set checked for dhcp radio button
+          // send response
           res.render('addresses/add', {
             error_msg: message,
             prefix: req.body.prefix,
@@ -121,7 +157,7 @@ router.post('/add', (req, res) => {
             } else {
               // doesn't match existing site
               let message = 'Site Doesn\'t Exist. Please select an available site or create a new one';
-              // send response and set checked for dhcp radio button
+              // send response
               res.render('addresses/add', {
                 error_msg: message,
                 prefix: req.body.prefix,
@@ -203,7 +239,7 @@ router.post('/add', (req, res) => {
           if (cidr !== bits) {
             // don't match, send error
             let message = 'CIDR and subnet don\'t match';
-            // send response and set checked for dhcp radio button
+            // send response
             res.render('addresses/add', {
               error_msg: message,
               prefix: req.body.prefix,
@@ -238,10 +274,26 @@ router.post('/add', (req, res) => {
         });
 
         newAddress.save()
-          .then(address => {
-            // send success message
-            req.flash('success_msg', `${address.ip} added!`);
-            res.redirect('/addresses/add');
+          .then(savedAddress => {
+            if (customer !== "") {
+              // assign IP address to customer
+              Customer.updateOne({name: customer}, {$push: {addresses: address}}, (err, record) => {
+                if (err) {
+                  throw err;
+                } else {
+                  // customer updated with IP address!
+                  res.render('addresses/add', {
+                    success_msg: `Address ${address} created!`
+                  });
+                }
+              });
+              return true;
+            } else {
+              // send success message
+              req.flash('success_msg', `${savedAddress.ip} added!`);
+              res.redirect('/addresses/add');
+              return true;
+            }
           })
           .catch(err => {
             req.flash('error_msg', `Failed to add address. Error is ${err}`);
@@ -250,6 +302,33 @@ router.post('/add', (req, res) => {
           });
       }
     });
+  }
+
+  function validatePrefix(prefix) {
+    // define regular expressions for validating prefixes
+    const v4PreRE = /((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])(\/([1-9]|[1-2][0-9]|3[0-1]))?$/;
+    const v6PreRE = /(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/;
+
+    if ( !(v4PreRE.test(prefix) || v6PreRE.test(prefix)) ) {
+      // invalid prefix given
+      let message = 'Not a valid IPv4 or IPv6 Prefix';
+        // send response and set checked for dhcp radio button
+        res.render('addresses/add', {
+          error_msg: message,
+          prefix: req.body.prefix,
+          address: req.body.address,
+          customer: req.body.customer,
+          gateway: gateway,
+          subnet: subnet,
+          site: site,
+          description: req.body.description
+        });
+        return false;
+    } else {
+      // prefix is valid IPv4 or IPv6
+      return true;
+    }
+  }
 });
 
 module.exports = router;

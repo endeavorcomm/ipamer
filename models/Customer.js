@@ -16,10 +16,6 @@ const CustomerSchema = new Schema({
     type: Array,
     required: false
   },
-  sites: {
-    type: Array,
-    required: false
-  },
   date: {
     type: Date,
     default: Date.now

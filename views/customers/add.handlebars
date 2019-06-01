@@ -1,0 +1,25 @@
+<div class="row mt-4">
+  <h5 class="center-align">Add Customer</h5>
+  <form action="/customers/add" method="POST" class="col s12 ml-3 mr-3" id="addCustomerForm">
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="name" id="customer-name" data-length="50" value="{{name}}" required>
+        <label for="customer-name">Name*</label>
+      </div>
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3">
+        <input type="text" name="address" id="customer-address" data-length="50" value="{{address}}">
+        <label for="customer-address">IP Address</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s8 offset-s2 m6 offset-m3 l3 offset-l3">
+        <input type="text" name="description" id="customer-description" data-length="50" value="{{description}}">
+        <label for="customer-description">Description</label>
+      </div>
+    </div>
+    <div class="center-align mb-5">
+      <button class="btn" type="submit" name="addCustomer" id="addCustomer">Add</button>
+    </div>
+  </form>
+</div>
+<script src="/js/customers-add.js"></script>

@@ -41,6 +41,10 @@ const Prefix = mongoose.model('prefixes');
 require('./models/Site');
 const Site = mongoose.model('sites');
 
+// load address model
+require('./models/Address');
+const Address = mongoose.model('addresses');
+
 // MongoDBStore Middleware
 store.on('error', function(error) {
   console.log(error);
@@ -87,8 +91,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/findPrefix', (req, res) => {
-  const pre = req.query.prefix;
-  Prefix.findOne({prefix: pre}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})
+  const prefix = req.query.prefix;
+  Prefix.findOne({prefix: prefix}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})
   .then(prefix => {
     res.send(prefix);
   });
@@ -116,14 +120,16 @@ app.get('/getSites', (req, res) => {
 });
 
 // load routes
-const sites = require('./routes/sites');
-const prefixes = require('./routes/prefixes');
 const addresses = require('./routes/addresses');
+const customers = require('./routes/customers');
+const prefixes = require('./routes/prefixes');
+const sites = require('./routes/sites');
 
 // use routers
-app.use('/sites', sites);
-app.use('/prefixes', prefixes);
 app.use('/addresses', addresses);
+app.use('/customers', customers);
+app.use('/prefixes', prefixes);
+app.use('/sites', sites);
 
 server.listen(80, () => {
   console.log('Server Listening on Port 80...')
