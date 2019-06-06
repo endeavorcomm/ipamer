@@ -25,7 +25,25 @@ router.get('/status', (req, res) => {
         prefix: prefixes
       });
     });
-})
+});
+
+// prefix detail routes
+router.get('/prefix?:_id', (req, res) => {
+  const _id = req.params._id;
+  // query prefix
+  Prefix.find({_id: _id}, {})
+    .then(prefix => {
+      res.render('prefixes/prefix', {
+        name: prefix.name,
+        prefix: prefix.prefix,
+        gateway: prefix.gateway,
+        subnet: prefix.subnet,
+        desription: prefix.description,
+        system: prefix.system,
+        site: prefix.site
+      });
+    });
+});
 
 // process prefix creation form
 router.post('/add', (req, res) => {
