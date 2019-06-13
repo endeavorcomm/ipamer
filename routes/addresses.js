@@ -279,6 +279,10 @@ router.post('/add', (req, res) => {
       }
 
       function createAddress(gateway, subnet, site) {
+        let status = 'Available';
+        if (customer !== "") {
+          status = 'Active';
+        }
         const newAddress = new Address({
           ip: req.body.address,
           type: 'Unicast',
@@ -287,6 +291,7 @@ router.post('/add', (req, res) => {
           gateway: gateway,
           subnet: subnet,
           site: site,
+          status: status,
           description: req.body.description
         });
 

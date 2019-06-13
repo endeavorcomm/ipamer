@@ -5,6 +5,7 @@
         <tr>
           <th>IP Address</th>
           <th>Site</th>
+          <th>Status</th>
           <th>Customer</th>
           <th>Subnet</th>
           <th>Gateway</th>
@@ -14,7 +15,7 @@
       <tbody>
         {{#each address}}
         <tr>
-          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td>
+          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.status}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td>
         </tr>
         {{/each}}
       </tbody>

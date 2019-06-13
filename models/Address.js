@@ -32,6 +32,10 @@ const AddressSchema = new Schema({
     type: String,
     required: false
   },
+  status: {
+    type: String,
+    default: 'Available'
+  },
   description: {
     type: String,
     required: false

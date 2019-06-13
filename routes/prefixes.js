@@ -28,19 +28,19 @@ router.get('/status', (req, res) => {
 });
 
 // prefix detail routes
-router.get('/prefix?:_id', (req, res) => {
+router.get('/prefix/:_id', (req, res) => {
   const _id = req.params._id;
   // query prefix
   Prefix.find({_id: _id}, {})
     .then(prefix => {
       res.render('prefixes/prefix', {
-        name: prefix.name,
-        prefix: prefix.prefix,
-        gateway: prefix.gateway,
-        subnet: prefix.subnet,
-        desription: prefix.description,
-        system: prefix.system,
-        site: prefix.site
+        name: prefix[0].name,
+        prefix: prefix[0].prefix,
+        gateway: prefix[0].gateway,
+        subnet: prefix[0].subnet,
+        desription: prefix[0].description,
+        system: prefix[0].system,
+        site: prefix[0].site
       });
     });
 });
@@ -513,11 +513,14 @@ router.post('/add', (req, res) => {
                     let newAddress = new Address({
                       ip: ip1,
                       type: 'Network',
+                      customer: '',
                       prefix: req.body.prefix,
                       gateway: req.body.gateway,
-                      customer: '',
                       subnet: sMask,
-                      site: req.body.site
+                      site: req.body.site,
+                      status: 'Available',
+                      description: ''
+
                     });
                     newAddress.save();
                   } else if (n == octetFourLength1) {
@@ -525,11 +528,13 @@ router.post('/add', (req, res) => {
                     let newAddress = new Address({
                       ip: ip1,
                       type: 'Broadcast',
+                      customer: '',
                       prefix: req.body.prefix,
                       gateway: req.body.gateway,
-                      customer: '',
                       subnet: sMask,
-                      site: req.body.site
+                      site: req.body.site,
+                      status: 'Available',
+                      description: ''
                     });
                     newAddress.save();
                   } else {
@@ -537,11 +542,13 @@ router.post('/add', (req, res) => {
                     let newAddress = new Address({
                       ip: ip1,
                       type: 'Unicast',
+                      customer: '',
                       prefix: req.body.prefix,
                       gateway: req.body.gateway,
-                      customer: '',
                       subnet: sMask,
-                      site: req.body.site
+                      site: req.body.site,
+                      status: 'Available',
+                      description: ''
                     });
                     newAddress.save();
                   }
@@ -564,31 +571,37 @@ router.post('/add', (req, res) => {
                       new Address({
                         ip: ip2,
                         type: 'Network',
+                        customer: '',
                         prefix: req.body.prefix,
                         gateway: req.body.gateway,
-                        customer: '',
                         subnet: sMask,
-                        site: req.body.site
+                        site: req.body.site,
+                        status: 'Available',
+                        description: ''
                       });
                     } else if (n == octetThreeLength2 && nn == octetFourLength2) {
                       new Address({
                         ip: ip2,
                         type: 'Broadcast',
+                        customer: '',
                         prefix: req.body.prefix,
                         gateway: req.body.gateway,
-                        customer: '',
                         subnet: sMask,
-                        site: req.body.site
+                        site: req.body.site,
+                        status: 'Available',
+                        description: ''
                       });
                     } else {
                       new Address({
                         ip: ip2,
                         type: 'Unicast',
+                        customer: '',
                         prefix: req.body.prefix,
                         gateway: req.body.gateway,
-                        customer: '',
                         subnet: sMask,
-                        site: req.body.site
+                        site: req.body.site,
+                        status: 'Available',
+                        description: ''
                       });
                     }
                   }
@@ -614,32 +627,38 @@ router.post('/add', (req, res) => {
                         new Address({
                           ip: ip3,
                           type: 'Network',
+                          customer: '',
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
-                          customer: '',
                           subnet: sMask,
-                          site: req.body.site
+                          site: req.body.site,
+                          status: 'Available',
+                          description: ''
                         });
                       }
                       if (n == octetTwoLength3 && nn == octetThreeLength3 && nnn == octetFourLength3) {
                         new Address({
                           ip: ip3,
                           type: 'Broadcast',
+                          customer: '',
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
-                          customer: '',
                           subnet: sMask,
-                          site: req.body.site
+                          site: req.body.site,
+                          status: 'Available',
+                          description: ''
                         });
                       } else {
                         new Address({
                           ip: ip3,
                           type: 'Unicast',
+                          customer: '',
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
-                          customer: '',
                           subnet: sMask,
-                          site: req.body.site
+                          site: req.body.site,
+                          status: 'Available',
+                          description: ''
                         });
                       }
                     }
@@ -670,31 +689,37 @@ router.post('/add', (req, res) => {
                           new Address({
                             ip: ip4,
                             type: 'Network',
+                            customer: '',
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
-                            customer: '',
                             subnet: sMask,
-                            site: req.body.site
+                            site: req.body.site,
+                            status: 'Available',
+                            description: ''
                           });
                         } else if (n == octetOneLength4 && nn == octetTwoLength4 && nnn == octetThreeLength4 && nnnn == octetFourLength4) {
                           new Address({
                             ip: ip4,
                             type: 'Broadcast',
+                            customer: '',
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
-                            customer: '',
                             subnet: sMask,
-                            site: req.body.site
+                            site: req.body.site,
+                            status: 'Available',
+                            description: ''
                           });
                         } else {
                           new Address({
                             ip: ip4,
                             type: 'Unicast',
+                            customer: '',
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
-                            customer: '',
                             subnet: sMask,
-                            site: req.body.site
+                            site: req.body.site,
+                            status: 'Available',
+                            description: ''
                           });
                         }
                       }
@@ -740,21 +765,25 @@ router.post('/add', (req, res) => {
             let nAddress = new Address({
               ip: networkAddress,
               type: 'Network',
+              customer: '',
               prefix: req.body.prefix,
               gateway: req.body.gateway,
-              customer: '',
               subnet: sMask,
-              site: req.body.site
+              site: req.body.site,
+              status: 'Available',
+              description: ''
             });
 
             let bAddress = new Address({
               ip: broadcastAddress,
               type: 'Broadcast',
+              customer: '',
               prefix: req.body.prefix,
               gateway: req.body.gateway,
-              customer: '',
               subnet: sMask,
-              site: req.body.site
+              site: req.body.site,
+              status: 'Available',
+              description: ''
             });
 
             if (nAddress.save() && bAddress.save()) {

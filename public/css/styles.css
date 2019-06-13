@@ -70,7 +70,7 @@
   margin-top: 3rem;
 }
 
-/* Materialize */
+/* Materialize Overrides*/
 .btn-large i {
   font-size: 36px;
 }
@@ -120,12 +120,23 @@
   display: none;
 }
 
+#messageForm {
+  padding: 3px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+#messageForm input {
+  border: 0;
+  padding: 10px;
+  width: 80%;
+  margin-right: .5%;
+}
+
 #messages {
   list-style-type: none; margin: 0; padding: 0;
 }
 #messages li {
   padding: 5px 10px;
 }
-
-#messageForm { padding: 3px; position: fixed; bottom: 0; width: 100%; }
-#messageForm input { border: 0; padding: 10px; width: 80%; margin-right: .5%; }
