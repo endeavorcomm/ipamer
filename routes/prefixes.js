@@ -30,17 +30,24 @@ router.get('/status', (req, res) => {
 // prefix detail routes
 router.get('/prefix/:_id', (req, res) => {
   const _id = req.params._id;
+
   // query prefix
   Prefix.find({_id: _id}, {})
     .then(prefix => {
-      res.render('prefixes/prefix', {
-        name: prefix[0].name,
-        prefix: prefix[0].prefix,
-        gateway: prefix[0].gateway,
-        subnet: prefix[0].subnet,
-        desription: prefix[0].description,
-        system: prefix[0].system,
-        site: prefix[0].site
+      // query addresses in prefix
+      Address.find({type: 'Unicast', prefix: prefix[0].prefix}, {}).sort({ip: 1})
+      .then(addresses => {
+        res.render('prefixes/prefix', {
+          id: prefix[0]._id,
+          name: prefix[0].name,
+          prefix: prefix[0].prefix,
+          gateway: prefix[0].gateway,
+          subnet: prefix[0].subnet,
+          desription: prefix[0].description,
+          system: prefix[0].system,
+          site: prefix[0].site,
+          address: addresses
+        });
       });
     });
 });

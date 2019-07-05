@@ -1,7 +1,51 @@
-<h4 class="mt-5 ml-5">{{prefix}}</h4>
 <div class="row mt-4">
   <div class="col s12">
-    <h3>{{name}}</h3>
-    <h3>{{system}}</h3>
+    <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>
   </div>
 </div>
+<div class="row mt-4">
+  <div class="col s10 offset-s1">
+    <table>
+      <thead>
+        <tr>
+          <th>IP Address</th>
+          <th>Site</th>
+          <th>Status</th>
+          <th>Customer</th>
+          <th>Subnet</th>
+          <th>Gateway</th>
+          <th>Prefix</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each address}}
+        <tr>
+          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.status}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td><td><a href="#" class="edi-item"><i class="edit-item material-icons" id="{{this.id}}">edit</i></a></td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+</div>
+<!-- assign address modal -->
+<!-- <div class="modal" id="assign-address"> -->
+  <div id="assign-address">
+    <form action="/addresses/assign" method="POST" class="col">
+      <div class="row">
+        <div class="input-field">
+          <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
+          <label for="address-customer">Customer</label>
+          <input type="hidden" name="id" value="{{id}}">
+        </div>
+        <div class="center-align mb-5">
+          <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
+        </div>
+      </div>
+    </form>
+  </div>
+  <!-- <div class="modal-footer">
+    <a class="modal-close btn-flat" href="#!">Cancel</a>
+  </div>
+</div> -->
+<script src="/js/addresses-assign.js"></script>

@@ -39,7 +39,13 @@ router.get('/status', (req, res) => {
         address: addresses
       });
     });
-})
+});
+
+router.post('/assign', (req, res) => {
+  const assignToCustomer = req.body.customer;
+  const id = req.body.id;
+
+});
 
 // process address creation form
 router.post('/add', (req, res) => {

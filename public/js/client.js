@@ -10,4 +10,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // give search field focus on page load
   document.getElementById('nav-search').focus();
+
 });

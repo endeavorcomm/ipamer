@@ -88,6 +88,15 @@
   display: none;
 }
 
+#assign-address {
+  display: none;
+  z-index: 1003;
+  opacity: 1;
+  top: 10%;
+  width: 25%;
+  transform: scaleX(1) scaleY(1);
+}
+
 #fabAddressLabel {
   position: relative;
   left: -53px;
