@@ -76,6 +76,10 @@
 }
 
 /* Local */
+td {
+  word-break: break-all;
+}
+
 .fab-label {
   color: black;
 }
@@ -84,17 +88,27 @@
   font-size: 1rem;
 }
 
+#alert_msg {
+  display: none;
+}
+
 #butInstall {
   display: none;
 }
 
 #assign-address {
   display: none;
-  z-index: 1003;
-  opacity: 1;
-  top: 10%;
-  width: 25%;
-  transform: scaleX(1) scaleY(1);
+  position: fixed;
+  left: 0;
+  right: 0;
+  background-color: #fafafa;
+  padding: 0;
+  max-height: 70%;
+  width: 55%;
+  margin: auto;
+  overflow-y: auto;
+  border-radius: 2px;
+  will-change: top, opacity;
 }
 
 #fabAddressLabel {
@@ -146,6 +160,22 @@
 #messages {
   list-style-type: none; margin: 0; padding: 0;
 }
+
 #messages li {
   padding: 5px 10px;
+}
+
+#unassign-address {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  background-color: #fafafa;
+  padding: 0;
+  max-height: 70%;
+  width: 55%;
+  margin: auto;
+  overflow-y: auto;
+  border-radius: 2px;
+  will-change: top, opacity;
 }

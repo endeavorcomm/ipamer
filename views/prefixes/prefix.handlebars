@@ -1,51 +1,62 @@
 <div class="row mt-4">
-  <div class="col s12">
-    <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>
+  <div class="col s10 offset-s1">
+    <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3><h5>Subnet - {{this.subnet}}</h5><h5>Gateway - {{this.gateway}}</h5><h5>Prefix - {{this.prefix}}</h5>
   </div>
 </div>
 <div class="row mt-4">
   <div class="col s10 offset-s1">
-    <table>
+    <table id="theTable">
       <thead>
         <tr>
           <th>IP Address</th>
-          <th>Site</th>
           <th>Status</th>
           <th>Customer</th>
-          <th>Subnet</th>
-          <th>Gateway</th>
-          <th>Prefix</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {{#each address}}
         <tr>
-          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.status}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td><td><a href="#" class="edi-item"><i class="edit-item material-icons" id="{{this.id}}">edit</i></a></td>
+          <td>{{this.ip}}</td><td>{{this.status}}</td><td id="id-{{this.id}}">{{this.customer}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{this.id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{this.id}}"></i></a></td>
         </tr>
         {{/each}}
       </tbody>
     </table>
   </div>
-</div>
-<!-- assign address modal -->
-<!-- <div class="modal" id="assign-address"> -->
-  <div id="assign-address">
-    <form action="/addresses/assign" method="POST" class="col">
+  <div class="z-depth-5" id="assign-address">
+    <h5 class="center" id="assignIPHeader">Assign Customer to IP</h3>
+    <br><br>
+    <form class="container" action="/addresses/assign" method="POST" class="col">
       <div class="row">
         <div class="input-field">
           <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
           <label for="address-customer">Customer</label>
-          <input type="hidden" name="id" value="{{id}}">
+          <input type="hidden" name="addressID" id="addressID" value="">
+          <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
         </div>
         <div class="center-align mb-5">
           <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
+          <button class="btn" type="button" name="close" id="assignCustomerClose">Close</button>
         </div>
       </div>
     </form>
   </div>
-  <!-- <div class="modal-footer">
-    <a class="modal-close btn-flat" href="#!">Cancel</a>
+  <div class="z-depth-5" id="unassign-address">
+    <h5 class="center" id="unassignIPHeader">Unassign Customer from IP</h3>
+    <br><br>
+    <form class="container" action="/addresses/unassign" method="POST" class="col">
+      <div class="row">
+        <div class="input-field">
+          <input type="hidden" name="unaddressID" id="unaddressID" value="">
+          <input type="hidden" name="uncustomer" id="uncustomer" value="">
+          <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
+        </div>
+        <div class="center-align mb-5">
+          <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
+          <button class="btn" type="button" name="unclose" id="unassignCustomerClose">Close</button>
+        </div>
+      </div>
+    </form>
   </div>
-</div> -->
+</div>
 <script src="/js/addresses-assign.js"></script>

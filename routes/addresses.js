@@ -43,8 +43,60 @@ router.get('/status', (req, res) => {
 
 router.post('/assign', (req, res) => {
   const assignToCustomer = req.body.customer;
-  const id = req.body.id;
+  const address_id = req.body.addressID;
+  const prefix_id = req.body.prefixID;
+  
+  // assign customer to IP address
+  Address.updateOne({_id: address_id}, {customer: assignToCustomer, status: 'Active'}, (err, record) => {
+    if (err) {
+      throw err;
+    } else {
+      // customer assigned to IP address!
+    }
+  });
 
+  // get IP address from _id
+  Address.findOne({_id: address_id}, {ip: 1})
+    .then(ip => {
+      // assign IP address to customer
+      Customer.updateOne({name: assignToCustomer}, {$push: {addresses: ip.ip}}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // customer updated with IP address!
+          res.redirect(`/prefixes/prefix/${prefix_id}`);
+        }
+      });
+    });
+});
+
+router.post('/unassign', (req, res) => {
+  const unassignFromCustomer = req.body.uncustomer;
+  const address_id = req.body.unaddressID;
+  const prefix_id = req.body.unprefixID;
+  
+  // unassign customer from IP address
+  Address.updateOne({_id: address_id}, {customer: '', status: 'Available'}, (err, record) => {
+    if (err) {
+      throw err;
+    } else {
+      // customer unassigned from IP address!
+    }
+  });
+
+  // get IP address from _id
+  Address.findOne({_id: address_id}, {ip: 1})
+    .then(ip => {
+      // unassign IP address from customer
+      Customer.updateOne({name: unassignFromCustomer}, {$pull: {addresses: ip.ip}}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // customer updated with IP address!
+          res.redirect(`/prefixes/prefix/${prefix_id}`);
+        }
+      });
+    });
 });
 
 // process address creation form

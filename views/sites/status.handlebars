@@ -12,7 +12,7 @@
       <tbody>
         {{#each site}}
         <tr>
-          <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{this.prefixes}}</td>
+          <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#this.prefixes}}{{this}}<br>{{/this.prefixes}}</td>
         </tr>
         {{/each}}
       </tbody>

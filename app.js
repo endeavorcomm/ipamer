@@ -97,6 +97,14 @@ app.get('/findPrefix', (req, res) => {
   });
 });
 
+app.get('/findAddress', (req, res) => {
+  const _id = req.query.id;
+  Address.findOne({_id: _id}, {ip: 1, _id: 0})
+  .then(address => {
+    res.send(address);
+  });
+});
+
 app.get('/getCustomers', (req, res) => {
   Customer.find({}, {name: 1, _id: 0})
   .then(customers => {

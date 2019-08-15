@@ -7,16 +7,63 @@ document.addEventListener('DOMContentLoaded', function() {
   var customerAuto = document.getElementById('address-customer');
   M.Autocomplete.init(customerAuto);
 
-  // add event listenters to address edit icon
-  const editEls = document.querySelectorAll('.edit-item');
-    
-  editEls.forEach(function (edit) {
+  // initialize tooltips
+  var tooltips = document.querySelectorAll('.tooltipped');
+  M.Tooltip.init(tooltips);
+
+  // add event listener to address-assign close button
+  const assignCustomerClose = document.getElementById('assignCustomerClose');
+  assignCustomerClose.addEventListener('click', function(e) {
+    document.getElementById('assign-address').style.display = 'none';
+  });
+
+  // add event listener to address-unassign close button
+  const unassignCustomerClose = document.getElementById('unassignCustomerClose');
+  unassignCustomerClose.addEventListener('click', function(e) {
+    document.getElementById('unassign-address').style.display = 'none';
+  });
+
+  // add event listenters to address action icons
+  const assignEls = document.querySelectorAll('.assignCustomer');
+  assignEls.forEach(function (edit) {
     edit.addEventListener('click', function(e){
       const id = e.target.id;
-      document.getElementById('assign-address').style.display = 'block';
-      // show the modal to assign customer
-      //let modalInstance = M.Modal.getInstance(modal);
-      //modalInstance.open(id);
+      // TODO get ip address for popupbox with event bubbling to parent
+
+      var customerName = document.getElementById(`id-${id}`).innerHTML;
+      
+      if(customerName !== '') {
+        // customer already assigned
+        M.toast({html: 'Address already assigned'})
+      } else {
+        // assign the database id, of the ip address, to this hidden input field's value
+        document.getElementById('addressID').value = id;
+        // assign this text to the header of the popup box
+        //document.getElementById('assignIPHeader').textContent = `Assign Customer to IP`;
+        // show the popup box
+        document.getElementById('assign-address').style.display = 'block';
+      }
+
+      e.preventDefault();
+    });
+  });
+
+  const unassignEls = document.querySelectorAll('.unassignCustomer');
+  unassignEls.forEach(function (edit) {
+    edit.addEventListener('click', function(e){
+      // TODO get ip address for popupbox with event bubbling to parent
+      const id = e.target.id;
+      var uncustomerName = document.getElementById(`id-${id}`).innerHTML;
+
+      if(uncustomerName == '') {
+        // no customer assigned
+        M.toast({html: 'Address not assigned'})
+      } else {
+        document.getElementById('unaddressID').value = id;
+        document.getElementById('uncustomer').value = uncustomerName;
+        //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
+        document.getElementById('unassign-address').style.display = 'block';
+      }
 
       e.preventDefault();
     });

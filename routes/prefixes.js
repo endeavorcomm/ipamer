@@ -464,7 +464,7 @@ router.post('/add', (req, res) => {
       .then(prefix => {
         // check if site was assigned
         if (site !== "") {
-          // assign IP address to customer
+          // assign prefix to site
           Site.updateOne({name: site}, {$push: {prefixes: prefix.prefix}}, (err, record) => {
             if (err) {
               throw err;

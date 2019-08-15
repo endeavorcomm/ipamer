@@ -11,7 +11,7 @@
       <tbody>
         {{#each customer}}
         <tr>
-          <td>{{this.name}}</td><td>{{this.addresses}}</td><td>{{this.description}}</td>
+          <td>{{this.name}}</td><td>{{#this.addresses}}{{this}}<br>{{/this.addresses}}</td><td>{{this.description}}</td>
         </tr>
         {{/each}}
       </tbody>
