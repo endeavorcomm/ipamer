@@ -1,20 +1,22 @@
-<div class="row mt-4">
-  <div class="col s10 offset-s1">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>IP Addresses</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each customer}}
-        <tr>
-          <td>{{this.name}}</td><td>{{#this.addresses}}{{this}}<br>{{/this.addresses}}</td><td>{{this.description}}</td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
+<div class="container">
+  <h2>Customers</h2>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table>
+        <thead class="grey lighten-3">
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each customer}}
+          <tr>
+            <td><a href="/customers/customer/{{this._id}}">{{this.name}}</a></td><td>{{this.description}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

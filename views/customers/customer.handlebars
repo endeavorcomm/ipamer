@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="right">
+    <a class="btn light-blue lighten-1">Edit Customer</a>
+  </div>
+  <h3 class="customerName">{{customer.name}}</h3>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table id="theTable">
+        <thead class="grey lighten-3">
+          <tr>
+            <th>IP Address</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each customer.addresses}}
+          <tr>
+            <td>{{this.ip}}</td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="z-depth-5" id="unassign-address">
+    <h5 class="center" id="unassignIPHeader">Unassign IP from Customer</h3>
+    <br><br>
+    <form class="container" action="/addresses/unassign" method="POST" class="col">
+      <div class="row">
+        <div class="input-field">
+          <input type="hidden" name="unaddressID" id="unaddressID" value="">
+          <input type="hidden" name="uncustomer" id="uncustomer" value="">
+          <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
+        </div>
+        <div class="center-align mb-5">
+          <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
+          <button class="btn" type="button" name="unclose" id="unassignCustomerClose">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="/js/customers-unassign.js"></script>

@@ -1,5 +1,6 @@
 <div class="row mt-4">
   <div class="col s10 offset-s1">
+    <h2>Addresses</h2>
     <table>
       <thead>
         <tr>
@@ -15,7 +16,7 @@
       <tbody>
         {{#each address}}
         <tr>
-          <td>{{this.ip}}</td><td>{{this.site}}</td><td>{{this.status}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td>
+          <td id="{{this.ip}}">{{this.ip}}</td><td>{{this.site}}</td><td>{{this.status}}</td><td>{{this.customer}}</td><td>{{this.subnet}}</td><td>{{this.gateway}}</td><td>{{this.prefix}}</td>
         </tr>
         {{/each}}
       </tbody>

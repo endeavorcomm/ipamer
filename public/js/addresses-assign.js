@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
   assignEls.forEach(function (edit) {
     edit.addEventListener('click', function(e){
       const id = e.target.id;
-      // TODO get ip address for popupbox with event bubbling to parent
+      // TODO get ip address for popupbox header with event bubbling to parent
 
       var customerName = document.getElementById(`id-${id}`).innerHTML;
       
@@ -51,8 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const unassignEls = document.querySelectorAll('.unassignCustomer');
   unassignEls.forEach(function (edit) {
     edit.addEventListener('click', function(e){
-      // TODO get ip address for popupbox with event bubbling to parent
+      // TODO get ip address for popupbox header with event bubbling to parent
       const id = e.target.id;
+      console.log(id);
       var uncustomerName = document.getElementById(`id-${id}`).innerHTML;
 
       if(uncustomerName == '') {

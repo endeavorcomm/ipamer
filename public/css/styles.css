@@ -88,6 +88,10 @@ td {
   font-size: 1rem;
 }
 
+.no-padding {
+  padding: 0;
+}
+
 #alert_msg {
   display: none;
 }

@@ -1,21 +1,27 @@
-<div class="row mt-4">
-  <div class="col s10 offset-s1">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Alias</th>
-          <th>Description</th>
-          <th>Prefixes</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each site}}
-        <tr>
-          <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#this.prefixes}}{{this}}<br>{{/this.prefixes}}</td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
+<div class="container">
+  <div class="right">
+    <a class="btn light-blue lighten-1">Edit Site</a>
+  </div>
+  <h2>Sites</h2>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table>
+        <thead class="grey lighten-3">
+          <tr>
+            <th>Name</th>
+            <th>Alias</th>
+            <th>Description</th>
+            <th>Prefixes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each site}}
+          <tr>
+            <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#this.prefixes}}<a href="/prefixes/status#{{this}}">{{this}}</a><br>{{/this.prefixes}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

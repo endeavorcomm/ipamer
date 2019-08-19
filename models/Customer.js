@@ -14,7 +14,15 @@ const CustomerSchema = new Schema({
   },
   addresses: {
     type: Array,
-    required: false
+    required: false,
+    id: {
+      type: String,
+      required: true
+    },
+    ip: {
+      type: String,
+      required: true
+    }
   },
   date: {
     type: Date,

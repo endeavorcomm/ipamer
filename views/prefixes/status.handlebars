@@ -1,25 +1,28 @@
-<div class="row mt-4">
-  <div class="col s10 offset-s1">
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>System</th>
-          <th>Description</th>
-          <th>Prefix</th>
-          <th>Site</th>
-          <th>Gateway</th>
-          <th>Subnet</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        {{#each prefix}}
-        <tr>
-          <td><a href="http://localhost/prefixes/prefix/{{this._id}}">{{this.name}}</a></td><td>{{this.system}}</td><td>{{this.description}}</td><td>{{this.prefix}}</td><td>{{this.site}}</td><td>{{this.gateway}}</td><td>{{this.subnet}}</td><td>{{this.type}}</td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
+<div class="container">
+  <h2>Prefixes</h2>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table>
+        <thead class="grey lighten-3">
+          <tr>
+            <th>Name</th>
+            <th>System</th>
+            <th>Description</th>
+            <th>Prefix</th>
+            <th>Site</th>
+            <th>Gateway</th>
+            <th>Subnet</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each prefix}}
+          <tr>
+            <td><a href="http://localhost/prefixes/prefix/{{this._id}}">{{this.name}}</a></td><td>{{this.system}}</td><td>{{this.description}}</td><td id="{{this.prefix}}">{{this.prefix}}</td><td>{{this.site}}</td><td>{{this.gateway}}</td><td>{{this.subnet}}</td><td>{{this.type}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>

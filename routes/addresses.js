@@ -59,7 +59,8 @@ router.post('/assign', (req, res) => {
   Address.findOne({_id: address_id}, {ip: 1})
     .then(ip => {
       // assign IP address to customer
-      Customer.updateOne({name: assignToCustomer}, {$push: {addresses: ip.ip}}, (err, record) => {
+      let address = {"id": ip._id, "ip": ip.ip}
+      Customer.updateOne({name: assignToCustomer}, {$push: {addresses: address}}, (err, record) => {
         if (err) {
           throw err;
         } else {
@@ -73,7 +74,6 @@ router.post('/assign', (req, res) => {
 router.post('/unassign', (req, res) => {
   const unassignFromCustomer = req.body.uncustomer;
   const address_id = req.body.unaddressID;
-  const prefix_id = req.body.unprefixID;
   
   // unassign customer from IP address
   Address.updateOne({_id: address_id}, {customer: '', status: 'Available'}, (err, record) => {
@@ -85,15 +85,20 @@ router.post('/unassign', (req, res) => {
   });
 
   // get IP address from _id
-  Address.findOne({_id: address_id}, {ip: 1})
-    .then(ip => {
-      // unassign IP address from customer
-      Customer.updateOne({name: unassignFromCustomer}, {$pull: {addresses: ip.ip}}, (err, record) => {
-        if (err) {
-          throw err;
-        } else {
-          // customer updated with IP address!
-          res.redirect(`/prefixes/prefix/${prefix_id}`);
+  Customer.findOne({name: unassignFromCustomer}, {addresses: 1})
+    .then(addressesFound => {
+      //find address in array with ip id that we want to unassign
+      addressesFound.addresses.forEach(address => {
+        if (address.id == address_id) {
+          // unassign IP address from customer
+          Customer.updateOne({name: unassignFromCustomer}, {$pull: {addresses: address}}, (err, record) => {
+            if (err) {
+              throw err;
+            } else {
+              // customer updated with IP address!
+              res.redirect(req.headers.referer);
+            }
+          });
         }
       });
     });
