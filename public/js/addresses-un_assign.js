@@ -30,11 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
       const id = e.target.id;
       // TODO get ip address for popupbox header with event bubbling to parent
 
-      var customerName = document.getElementById(`id-${id}`).innerHTML;
+      let customerName = document.getElementById(`name-${id}`).innerHTML;
       
       if(customerName !== '') {
         // customer already assigned
-        M.toast({html: 'Address already assigned'})
+        M.toast({html: 'Address already assigned'});
       } else {
         // assign the database id, of the ip address, to this hidden input field's value
         document.getElementById('addressID').value = id;
@@ -53,12 +53,11 @@ document.addEventListener('DOMContentLoaded', function() {
     edit.addEventListener('click', function(e){
       // TODO get ip address for popupbox header with event bubbling to parent
       const id = e.target.id;
-      console.log(id);
-      var uncustomerName = document.getElementById(`id-${id}`).innerHTML;
+      let uncustomerName = document.getElementById(`name-${id}`).innerHTML;
 
       if(uncustomerName == '') {
         // no customer assigned
-        M.toast({html: 'Address not assigned'})
+        M.toast({html: 'Address not assigned'});
       } else {
         document.getElementById('unaddressID').value = id;
         document.getElementById('uncustomer').value = uncustomerName;

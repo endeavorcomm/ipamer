@@ -1,0 +1,43 @@
+<div class="container">
+  <div class="right">
+    <a class="btn blue lighten-2">Edit Site</a>
+    <a class="btn red lighten-2">Delete Site</a>
+  </div>
+  <h3 class="siteName">{{site.name}}</h3>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table id="theTable">
+        <thead class="grey lighten-3">
+          <tr>
+            <th>Prefix</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each site.prefixes}}
+          <tr>
+            <td>{{this.prefix}}</td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="z-depth-5" id="unassign-prefix">
+    <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
+    <br><br>
+    <form class="container" action="/prefixes/unassign" method="POST" class="col">
+      <div class="row">
+        <div class="input-field">
+          <input type="hidden" name="unsite" id="unsite" value="">
+          <input type="hidden" name="unsiteID" id="unsiteID" value="{{this._id}}">
+        </div>
+        <div class="center-align mb-5">
+          <button class="btn" type="submit" name="unassignPrefix" id="unassignPrefix">Unassign</button>
+          <button class="btn" type="button" name="unclose" id="unassignPrefixClose">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="/js/prefixes-unassign.js"></script>

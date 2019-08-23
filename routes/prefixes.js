@@ -27,7 +27,7 @@ router.get('/status', (req, res) => {
     });
 });
 
-// prefix detail routes
+// prefix detail route
 router.get('/prefix/:_id', (req, res) => {
   const _id = req.params._id;
 
@@ -35,7 +35,7 @@ router.get('/prefix/:_id', (req, res) => {
   Prefix.find({_id: _id}, {})
     .then(prefix => {
       // query addresses in prefix
-      Address.find({type: 'Unicast', prefix: prefix[0].prefix}, {}).sort({ip: 1})
+      Address.find({type: 'Unicast', prefix: prefix[0].prefix}, {}).sort({ip: 1}).collation({locale: "en_US", numericOrdering: true})
       .then(addresses => {
         res.render('prefixes/prefix', {
           id: prefix[0]._id,
@@ -452,9 +452,9 @@ router.post('/add', (req, res) => {
     const newPrefix = new Prefix({
       name: req.body.name,
       type: req.body.type,
-      prefix: req.body.prefix,
-      gateway: req.body.gateway,
-      subnet: req.body.subnet,
+      prefix: prefix,
+      gateway: gateway,
+      subnet: subnet,
       description: req.body.description,
       system: req.body.system,
       site: req.body.site
@@ -462,10 +462,17 @@ router.post('/add', (req, res) => {
 
     newPrefix.save()
       .then(prefix => {
+        // define default customer address info
+        const addressDefault = {id: '', name: ''};
+        const addressNetwork = {id: 'Network', name: 'Reserved'};
+        const addressBroadcast = {id: 'Broadcast', name: 'Reserved'};
+        const addressGateway = {id: 'Gateway', name: 'Reserved'};
+
         // check if site was assigned
         if (site !== "") {
+          let prefixDetails = {id: prefix._id, prefix: prefix.prefix};
           // assign prefix to site
-          Site.updateOne({name: site}, {$push: {prefixes: prefix.prefix}}, (err, record) => {
+          Site.updateOne({name: site}, {$push: {prefixes: prefixDetails}}, (err, record) => {
             if (err) {
               throw err;
             } else {
@@ -520,13 +527,13 @@ router.post('/add', (req, res) => {
                     let newAddress = new Address({
                       ip: ip1,
                       type: 'Network',
-                      customer: '',
+                      customer: addressNetwork,
                       prefix: req.body.prefix,
                       gateway: req.body.gateway,
                       subnet: sMask,
                       site: req.body.site,
-                      status: 'Available',
-                      description: ''
+                      status: 'Active',
+                      description: 'Network IP'
 
                     });
                     newAddress.save();
@@ -535,29 +542,45 @@ router.post('/add', (req, res) => {
                     let newAddress = new Address({
                       ip: ip1,
                       type: 'Broadcast',
-                      customer: '',
+                      customer: addressBroadcast,
                       prefix: req.body.prefix,
                       gateway: req.body.gateway,
                       subnet: sMask,
                       site: req.body.site,
-                      status: 'Available',
-                      description: ''
+                      status: 'Active',
+                      description: 'Broadcast IP'
                     });
                     newAddress.save();
                   } else {
                     // address is normal
-                    let newAddress = new Address({
-                      ip: ip1,
-                      type: 'Unicast',
-                      customer: '',
-                      prefix: req.body.prefix,
-                      gateway: req.body.gateway,
-                      subnet: sMask,
-                      site: req.body.site,
-                      status: 'Available',
-                      description: ''
-                    });
-                    newAddress.save();
+                    if (ip1 == req.body.gateway) {
+                      // create gateway address
+                      let newAddress = new Address({
+                        ip: ip1,
+                        type: 'Unicast',
+                        customer: addressGateway,
+                        prefix: req.body.prefix,
+                        gateway: 'Self',
+                        subnet: sMask,
+                        site: req.body.site,
+                        status: 'Active',
+                        description: 'Gateway IP'
+                      });
+                      newAddress.save();
+                    } else {
+                      let newAddress = new Address({
+                        ip: ip1,
+                        type: 'Unicast',
+                        customer: addressDefault,
+                        prefix: req.body.prefix,
+                        gateway: req.body.gateway,
+                        subnet: sMask,
+                        site: req.body.site,
+                        status: 'Available',
+                        description: ''
+                      });
+                      newAddress.save();
+                    }
                   }
                 }
                 // send success message
@@ -575,41 +598,63 @@ router.post('/add', (req, res) => {
                     let ip2 = `${netOctets[0]}.${netOctets[1]}.${octetThreeValue2}.${octetFourValue2}`;
                     // add IP address into database
                     if (n == 0 && nn == 0) {
-                      new Address({
+                      // address is first in list, so it is the network address
+                      let newAddress = new Address({
                         ip: ip2,
                         type: 'Network',
-                        customer: '',
+                        customer: addressNetwork,
                         prefix: req.body.prefix,
                         gateway: req.body.gateway,
                         subnet: sMask,
                         site: req.body.site,
-                        status: 'Available',
-                        description: ''
+                        status: 'Active',
+                        description: 'Network IP'
                       });
+                      newAddress.save();
                     } else if (n == octetThreeLength2 && nn == octetFourLength2) {
-                      new Address({
+                      // address is last in list, so it is the broadcast address
+                      let newAddress = new Address({
                         ip: ip2,
                         type: 'Broadcast',
-                        customer: '',
+                        customer: addressBroadcast,
                         prefix: req.body.prefix,
                         gateway: req.body.gateway,
                         subnet: sMask,
                         site: req.body.site,
-                        status: 'Available',
-                        description: ''
+                        status: 'Active',
+                        description: 'Broadcast IP'
                       });
+                      newAddress.save();
                     } else {
-                      new Address({
-                        ip: ip2,
-                        type: 'Unicast',
-                        customer: '',
-                        prefix: req.body.prefix,
-                        gateway: req.body.gateway,
-                        subnet: sMask,
-                        site: req.body.site,
-                        status: 'Available',
-                        description: ''
-                      });
+                      // address is normal
+                      if (ip2 == req.body.gateway) {
+                        // create gateway address
+                        let newAddress = new Address({
+                          ip: ip2,
+                          type: 'Unicast',
+                          customer: addressGateway,
+                          prefix: req.body.prefix,
+                          gateway: 'Self',
+                          subnet: sMask,
+                          site: req.body.site,
+                          status: 'Active',
+                          description: 'Gateway IP'
+                        });
+                        newAddress.save();
+                      } else {
+                        let newAddress = new Address({
+                          ip: ip2,
+                          type: 'Unicast',
+                          customer: addressDefault,
+                          prefix: req.body.prefix,
+                          gateway: req.body.gateway,
+                          subnet: sMask,
+                          site: req.body.site,
+                          status: 'Available',
+                          description: ''
+                        });
+                        newAddress.save();
+                      }
                     }
                   }
                 }
@@ -631,42 +676,64 @@ router.post('/add', (req, res) => {
                       let ip3 = `${netOctets[0]}.${octetTwoValue3}.${octetThreeValue3}.${octetFourValue3}`;
                       // add IP address into database
                       if (n == 0 && nn == 0 && nnn == 0) {
-                        new Address({
+                        // address is first in list, so it is the network address
+                        let newAddress = new Address({
                           ip: ip3,
                           type: 'Network',
-                          customer: '',
+                          customer: addressNetwork,
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
                           subnet: sMask,
                           site: req.body.site,
-                          status: 'Available',
-                          description: ''
+                          status: 'Active',
+                          description: 'Network IP'
                         });
+                        newAddress.save();
                       }
                       if (n == octetTwoLength3 && nn == octetThreeLength3 && nnn == octetFourLength3) {
-                        new Address({
+                        // address is last in list, so it is the broadcast address
+                        let newAddress = new Address({
                           ip: ip3,
                           type: 'Broadcast',
-                          customer: '',
+                          customer: addressBroadcast,
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
                           subnet: sMask,
                           site: req.body.site,
-                          status: 'Available',
-                          description: ''
+                          status: 'Active',
+                          description: 'Broadcast IP'
                         });
+                        newAddress.save();
                       } else {
-                        new Address({
-                          ip: ip3,
-                          type: 'Unicast',
-                          customer: '',
-                          prefix: req.body.prefix,
-                          gateway: req.body.gateway,
-                          subnet: sMask,
-                          site: req.body.site,
-                          status: 'Available',
-                          description: ''
-                        });
+                        // address is normal
+                        if (ip3 == req.body.gateway) {
+                          // create gateway address
+                          let newAddress = new Address({
+                            ip: ip3,
+                            type: 'Unicast',
+                            customer: addressGateway,
+                            prefix: req.body.prefix,
+                            gateway: 'Self',
+                            subnet: sMask,
+                            site: req.body.site,
+                            status: 'Active',
+                            description: 'Gateway IP'
+                          });
+                          newAddress.save();
+                        } else {
+                          let newAddress = new Address({
+                            ip: ip3,
+                            type: 'Unicast',
+                            customer: addressDefault,
+                            prefix: req.body.prefix,
+                            gateway: req.body.gateway,
+                            subnet: sMask,
+                            site: req.body.site,
+                            status: 'Available',
+                            description: ''
+                          });
+                          newAddress.save();
+                        }
                       }
                     }
                   }
@@ -693,41 +760,63 @@ router.post('/add', (req, res) => {
                         let ip4 = `${octetOneValue4}.${octetTwoValue4}.${octetThreeValue4}.${octetFourValue4}`;
                         // add IP address into database
                         if (n == 0 && nn == 0 && nnn == 0 && nnnn == 0) {
-                          new Address({
+                          // address is first in list, so it is the network address
+                          let newAddress = new Address({
                             ip: ip4,
                             type: 'Network',
-                            customer: '',
+                            customer: addressNetwork,
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
                             subnet: sMask,
                             site: req.body.site,
-                            status: 'Available',
-                            description: ''
+                            status: 'Active',
+                            description: 'Network IP'
                           });
+                          newAddress.save();
                         } else if (n == octetOneLength4 && nn == octetTwoLength4 && nnn == octetThreeLength4 && nnnn == octetFourLength4) {
-                          new Address({
+                          // address is last in list, so it is the broadcast address
+                          let newAddress = new Address({
                             ip: ip4,
                             type: 'Broadcast',
-                            customer: '',
+                            customer: addressBroadcast,
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
                             subnet: sMask,
                             site: req.body.site,
-                            status: 'Available',
-                            description: ''
+                            status: 'Active',
+                            description: 'Broadcast IP'
                           });
+                          newAddress.save();
                         } else {
-                          new Address({
-                            ip: ip4,
-                            type: 'Unicast',
-                            customer: '',
-                            prefix: req.body.prefix,
-                            gateway: req.body.gateway,
-                            subnet: sMask,
-                            site: req.body.site,
-                            status: 'Available',
-                            description: ''
-                          });
+                          // address is normal
+                          if (ip4 == req.body.gateway) {
+                            // create gateway address
+                            let newAddress = new Address({
+                              ip: ip4,
+                              type: 'Unicast',
+                              customer: addressGateway,
+                              prefix: req.body.prefix,
+                              gateway: 'Self',
+                              subnet: sMask,
+                              site: req.body.site,
+                              status: 'Active',
+                              description: 'Gateway IP'
+                            });
+                            newAddress.save();
+                          } else {
+                            let newAddress = new Address({
+                              ip: ip4,
+                              type: 'Unicast',
+                              customer: addressDefault,
+                              prefix: req.body.prefix,
+                              gateway: req.body.gateway,
+                              subnet: sMask,
+                              site: req.body.site,
+                              status: 'Available',
+                              description: ''
+                            });
+                            newAddress.save();
+                          }
                         }
                       }
                     }
@@ -772,25 +861,25 @@ router.post('/add', (req, res) => {
             let nAddress = new Address({
               ip: networkAddress,
               type: 'Network',
-              customer: '',
+              customer: addressNetwork,
               prefix: req.body.prefix,
               gateway: req.body.gateway,
               subnet: sMask,
               site: req.body.site,
-              status: 'Available',
-              description: ''
+              status: 'Active',
+              description: 'Network IP'
             });
 
             let bAddress = new Address({
               ip: broadcastAddress,
               type: 'Broadcast',
-              customer: '',
+              customer: addressBroadcast,
               prefix: req.body.prefix,
               gateway: req.body.gateway,
               subnet: sMask,
               site: req.body.site,
-              status: 'Available',
-              description: ''
+              status: 'Active',
+              description: 'Broadcast IP'
             });
 
             if (nAddress.save() && bAddress.save()) {

@@ -12,13 +12,26 @@ router.get('/add', (req, res) => {
 // site status route
 router.get('/status', (req, res) => {
   // query sites
-  Site.find({}, {prefixes: 1, name: 2, description: 3, alias: 4, _id: 0}).sort({name: 1})
+  Site.find({}, {}).sort({name: 1})
     .then(sites => {
       res.render('sites/status', {
         site: sites
       });
     });
 })
+
+// site detail route
+router.get('/site/:_id', (req, res) => {
+  const _id = req.params._id;
+
+  // query site
+  Site.findOne({_id: _id}, {})
+    .then(site => {
+      res.render('sites/site', {
+        site: site
+      });
+    });
+});
 
 // process site creation form
 router.post('/add', (req, res) => {
@@ -40,8 +53,6 @@ router.post('/add', (req, res) => {
         alias: req.body.alias
       });
     } else {
-      let name = req.body.name;
-      name = name.replace(" ", "_");
       const newSite = new Site({
         name: name,
         description: req.body.description,

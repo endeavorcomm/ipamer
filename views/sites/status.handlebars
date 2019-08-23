@@ -1,7 +1,4 @@
 <div class="container">
-  <div class="right">
-    <a class="btn light-blue lighten-1">Edit Site</a>
-  </div>
   <h2>Sites</h2>
   <div class="row mt-4">
     <div class="col s12 no-padding">
@@ -17,7 +14,7 @@
         <tbody>
           {{#each site}}
           <tr>
-            <td>{{this.name}}</td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#this.prefixes}}<a href="/prefixes/status#{{this}}">{{this}}</a><br>{{/this.prefixes}}</td>
+            <td><a href="/sites/site/{{this._id}}">{{this.name}}</a></td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#each this.prefixes}}<a href="/prefixes/prefix/{{this.id}}">{{this.prefix}}</a><br>{{/each}}</td>
           </tr>
           {{/each}}
         </tbody>

@@ -18,7 +18,15 @@ const SiteSchema = new Schema({
   },
   prefixes: {
     type: Array,
-    required: false
+    required: false,
+    id: {
+      type: String,
+      required: true
+    },
+    prefix: {
+      type: String,
+      required: true
+    }
   },
   date: {
     type: Date,

@@ -25,20 +25,23 @@ router.get('/addresses', (req, res) => {
 });
 
 // customers routes
-// ## all
+// get all customers
 router.get('/customers', (req, res) => {
   Customer.getCustomers( (err, customers) => {
     if(err) throw err;
     res.json(customers);
   });
 });
-// ## one
+
+// get single customer
 router.get('/customers/:_id', (req, res) => {
   Customer.getCustomerById(req.params._id, (err, book) => {
     if(err) throw err;
     res.json(book);
   });
 });
+
+// add customer
 router.post('/customers', (req, res) => {
   let customer = req.body;
   Customer.addCustomer(customer, (err, customer) => {
@@ -46,6 +49,8 @@ router.post('/customers', (req, res) => {
     res.json(customer);
   });
 });
+
+// update customer
 router.put('/customers/:_id', (req, res) => {
   let id = req.params._id;
   let customer = req.body;
@@ -61,6 +66,7 @@ router.put('/customers/:_id', (req, res) => {
   });
 });
 
+// delete customer
 router.delete('/customers/:_id', (req, res) => {
   let id = req.params._id;
 

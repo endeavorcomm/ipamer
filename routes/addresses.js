@@ -41,31 +41,56 @@ router.get('/status', (req, res) => {
     });
 });
 
+// address detail route
+router.get('/address/:_id', (req, res) => {
+  const _id = req.params._id;
+
+  // query prefix
+  Address.findOne({_id: _id}, {})
+    .then(address => {
+      res.render('addresses/address', {
+        address: address
+      });
+    });
+});
+
 router.post('/assign', (req, res) => {
-  const assignToCustomer = req.body.customer;
+  const customer_name = req.body.customer;
   const address_id = req.body.addressID;
   const prefix_id = req.body.prefixID;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  // get customer info for IP assignment
+  Customer.findOne({name: customer_name}, {_id: 0, name: 2})
+    .then(customerFound => {
+      const customer = {id: customerFound._id, name: customerFound.name};
   
-  // assign customer to IP address
-  Address.updateOne({_id: address_id}, {customer: assignToCustomer, status: 'Active'}, (err, record) => {
-    if (err) {
-      throw err;
-    } else {
-      // customer assigned to IP address!
-    }
-  });
+      // assign customer to IP address
+      Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // customer assigned to IP address!
+        }
+      });
+    });
 
   // get IP address from _id
-  Address.findOne({_id: address_id}, {ip: 1})
-    .then(ip => {
+  Address.findOne({_id: address_id}, {ip: 2})
+    .then(ipFound => {
       // assign IP address to customer
-      let address = {"id": ip._id, "ip": ip.ip}
-      Customer.updateOne({name: assignToCustomer}, {$push: {addresses: address}}, (err, record) => {
+      let address = {id: address_id, ip: ipFound.ip};
+      Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
         if (err) {
           throw err;
         } else {
           // customer updated with IP address!
-          res.redirect(`/prefixes/prefix/${prefix_id}`);
+          res.redirect(reqURL);
         }
       });
     });
@@ -74,9 +99,17 @@ router.post('/assign', (req, res) => {
 router.post('/unassign', (req, res) => {
   const unassignFromCustomer = req.body.uncustomer;
   const address_id = req.body.unaddressID;
+  const prefix_id = req.body.unprefixID;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
   
   // unassign customer from IP address
-  Address.updateOne({_id: address_id}, {customer: '', status: 'Available'}, (err, record) => {
+  const clearCustomer = {id: '', name: ''};
+  Address.updateOne({_id: address_id}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
     if (err) {
       throw err;
     } else {
@@ -87,7 +120,7 @@ router.post('/unassign', (req, res) => {
   // get IP address from _id
   Customer.findOne({name: unassignFromCustomer}, {addresses: 1})
     .then(addressesFound => {
-      //find address in array with ip id that we want to unassign
+      // find address in array with ip id that we want to unassign
       addressesFound.addresses.forEach(address => {
         if (address.id == address_id) {
           // unassign IP address from customer
@@ -96,7 +129,7 @@ router.post('/unassign', (req, res) => {
               throw err;
             } else {
               // customer updated with IP address!
-              res.redirect(req.headers.referer);
+              res.redirect(reqURL);
             }
           });
         }
@@ -343,48 +376,98 @@ router.post('/add', (req, res) => {
 
       function createAddress(gateway, subnet, site) {
         let status = 'Available';
-        if (customer !== "") {
-          status = 'Active';
-        }
-        const newAddress = new Address({
-          ip: req.body.address,
-          type: 'Unicast',
-          customer: req.body.customer,
-          prefix: req.body.prefix,
-          gateway: gateway,
-          subnet: subnet,
-          site: site,
-          status: status,
-          description: req.body.description
-        });
+        let customer = {id: '', name: ''};
 
-        newAddress.save()
-          .then(savedAddress => {
-            if (customer !== "") {
-              // assign IP address to customer
-              Customer.updateOne({name: customer}, {$push: {addresses: address}}, (err, record) => {
-                if (err) {
-                  throw err;
-                } else {
-                  // customer updated with IP address!
-                  res.render('addresses/add', {
-                    success_msg: `Address ${address} created!`
-                  });
-                }
+        // if customer is being assigned
+        if (req.body.customer !== "") {
+          status = 'Active';
+          Customer.findOne({name: req.body.customer}, {})
+            .then(customerFound => {
+              customer = {id: customerFound._id, name: customerFound.name};
+              const newAddress = new Address({
+                ip: req.body.address,
+                type: 'Unicast',
+                customer: customer,
+                prefix: req.body.prefix,
+                gateway: gateway,
+                subnet: subnet,
+                site: site,
+                status: status,
+                description: req.body.description
               });
-              return true;
-            } else {
-              // send success message
-              req.flash('success_msg', `${savedAddress.ip} added!`);
-              res.redirect('/addresses/add');
-              return true;
-            }
-          })
-          .catch(err => {
-            req.flash('error_msg', `Failed to add address. Error is ${err}`);
-            res.render('addresses/add');
-            return;
+      
+              newAddress.save()
+                .then(savedAddress => {
+                  if (customer.id !== "") {
+                    let addressCreated = {id: savedAddress._id, ip: savedAddress.ip};
+                    // assign IP address to customer
+                    Customer.updateOne({name: customer.name}, {$push: {addresses: addressCreated}}, (err, record) => {
+                      if (err) {
+                        throw err;
+                      } else {
+                        // customer updated with IP address!
+                        res.render('addresses/add', {
+                          success_msg: `Address ${savedAddress.ip} created and assigned!`
+                        });
+                      }
+                    });
+                  } else {
+                    // send success message
+                    res.render('addresses/add', {
+                      success_msg: `Address ${savedAddress.ip} added!`
+                    });
+                  }
+                })
+                .catch(err => {
+                  res.render('addresses/add', {
+                    error_msg: `Failed to add address. Error is ${err}`
+                  });
+                });
+            });
+        } else {
+          // no customer being assigned, just create address
+          const newAddress = new Address({
+            ip: req.body.address,
+            type: 'Unicast',
+            customer: customer,
+            prefix: req.body.prefix,
+            gateway: gateway,
+            subnet: subnet,
+            site: site,
+            status: status,
+            description: req.body.description
           });
+  
+          newAddress.save()
+            .then(savedAddress => {
+              if (customer.id !== "") {
+                let addressCreated = {id: savedAddress._id, ip: savedAddress.ip};
+                // assign IP address to customer
+                Customer.updateOne({name: customer.name}, {$push: {addresses: addressCreated}}, (err, record) => {
+                  if (err) {
+                    throw err;
+                  } else {
+                    // customer updated with IP address!
+                    res.render('addresses/add', {
+                      success_msg: `Address ${savedAddress.ip} created and assigned!`
+                    });
+                  }
+                });
+              } else {
+                // send success message
+                res.render('addresses/add', {
+                  success_msg: `Address ${savedAddress.ip} added!`
+                });
+              }
+            })
+            .catch(err => {
+              res.render('addresses/add', {
+                error_msg: `Failed to add address. Error is ${err}`
+              });
+            });
+        }
+        
+        
       }
     });
   }

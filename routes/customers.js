@@ -23,13 +23,20 @@ router.get('/status', (req, res) => {
     });
 })
 
-// customer detail routes
+// customer detail route
 router.get('/customer/:_id', (req, res) => {
   const _id = req.params._id;
 
-  // query customer
+  // sort ip addresses by number, not string
+  function compare(a,b) {
+    const ipA = a.ip;
+    const ipB = b.ip;
+    return ipA.localeCompare(ipB, 'en', {numeric: true});
+  }
+
   Customer.findOne({_id: _id}, {})
     .then(customer => {
+      customer.addresses.sort(compare);
       res.render('customers/customer', {
         customer: customer
       });

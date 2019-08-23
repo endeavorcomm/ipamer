@@ -13,8 +13,14 @@ const AddressSchema = new Schema({
     required: true
   },
   customer: {
-    type: String,
-    required: false
+    id: {
+      type: String,
+      required: false
+    },
+    name: {
+      type: String,
+      required: false
+    }
   },
   prefix: {
     type: String,

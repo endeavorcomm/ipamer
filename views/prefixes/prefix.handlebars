@@ -1,6 +1,7 @@
 <div class="container">
   <div class="right">
-    <a class="btn light-blue lighten-1">Edit Prefix</a>
+    <a class="btn blue lighten-2">Edit Prefix</a>
+    <a class="btn red lighten-2">Delete Prefix</a>
   </div>
   <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if this.subnet}}<h6>Subnet - {{this.subnet}}</h6>{{/if}}<h6>Gateway - {{this.gateway}}</h6><h6>Prefix - {{this.prefix}}</h6>
   <div class="row mt-4">
@@ -18,7 +19,7 @@
         <tbody>
           {{#each address}}
           <tr>
-            <td>{{this.ip}}</td><td>{{this.status}}</td><td id="id-{{this.id}}">{{this.customer}}</td><td>{{this.description}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{this.id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{this.id}}"></i></a></td>
+            <td><a href="/addresses/address/{{this._id}}">{{this.ip}}</td><td>{{this.status}}</td><td id="name-{{this._id}}">{{this.customer.name}}</td><td>{{this.description}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{this._id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{this._id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
@@ -61,4 +62,4 @@
     </div>
   </div>
 </div>
-<script src="/js/addresses-assign.js"></script>
+<script src="/js/addresses-un_assign.js"></script>
