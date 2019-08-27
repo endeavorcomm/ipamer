@@ -126,6 +126,20 @@ app.get('/getSites', (req, res) => {
   });
 });
 
+app.get('/getAvailAddresses', (req, res) => {
+  Address.find({status: 'Available'}, {ip: 2, prefix: 5, _id: 0})
+  .then(addresses => {
+    res.send(addresses);
+  });
+});
+
+app.get('/getAvailPrefixes', (req, res) => {
+  Prefix.find({site: ''}, {prefix: 3, _id: 0})
+  .then(prefixes => {
+    res.send(prefixes);
+  });
+});
+
 // load routes
 const addresses = require('./routes/addresses');
 const api = require('./routes/api');

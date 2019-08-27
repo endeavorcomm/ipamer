@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addressSubnet == "") {
       addressSubnet.style.disabled = false;
     }
-    if (addressSite == "") {
-      addressSite.style.disabled = false;
-    }
+    // if (addressSite == "") {
+    //   addressSite.style.disabled = false;
+    // }
   }
 
   document.getElementById('address-customer').addEventListener('change', () => {
@@ -195,13 +195,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 addressSubnet.disabled = true;
               }
           
-              if (prefixSite == "") {
-                // prefix site field is empty in database, enable form Site field for assignment, if desired
-                addressSite.disabled = false;
-              } else {
-                // prefix subnet field is not empty in database, disable form Site field
-                addressSite.disabled = true;
-              }
+              // if (prefixSite == "") {
+              //   // prefix site field is empty in database, enable form Site field for assignment, if desired
+              //   addressSite.disabled = false;
+              // } else {
+              //   // prefix subnet field is not empty in database, disable form Site field
+              //   addressSite.disabled = true;
+              // }
       
               // show updated form field values
               M.updateTextFields();

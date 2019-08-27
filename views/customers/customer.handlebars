@@ -1,8 +1,8 @@
 <div class="container">
   <div class="right">
-    <a class="btn green lighten-2">Assign Address</a>
-    <a class="btn blue lighten-2">Edit Customer</a>
-    <a class="btn red lighten-2">Delete Customer</a>
+    <a class="btn green lighten-2" id="assignCustomerBtn">Assign Address</a>
+    <a class="btn blue lighten-2" id="editCustomerBtn">Edit Customer</a>
+    <a class="btn red lighten-2" id="deleteCustomerBtn">Delete Customer</a>
   </div>
   <h3 class="customerName">{{customer.name}}</h3>
   <div class="row mt-4">
@@ -17,26 +17,25 @@
         <tbody>
           {{#each customer.addresses}}
           <tr>
-            <td>{{this.ip}}</td><td><a alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
+            <td>{{this.ip}}</td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
     <div class="z-depth-5" id="assign-address">
-      <h5 class="center" id="assignIPHeader">Assign Customer to IP</h3>
+      <h5 class="center" id="assignIPHeader">Assign IP to Customer</h3>
       <br><br>
       <form class="container" action="/addresses/assign" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
-            <label for="address-customer">Customer</label>
-            <input type="hidden" name="addressID" id="addressID" value="">
-            <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
+            <input type="text" name="address" id="customer-address" data-length="20" class="autocomplete" autofocus required>
+            <label for="customer-address">IP Address</label>
+            <input type="hidden" name="customer" id="customer" value="">
           </div>
           <div class="center-align mb-5">
-            <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
-            <button class="btn" type="button" name="close" id="assignCustomerClose">Close</button>
+            <button class="btn" type="submit" name="assignIP" id="assignIP">Assign</button>
+            <button class="btn" type="button" name="close" id="assignIPClose">Close</button>
           </div>
         </div>
       </form>
@@ -60,4 +59,4 @@
     </div>
   </div>
 </div>
-<script src="/js/customers-unassign.js"></script>
+<script src="/js/customers-un_assign.js"></script>

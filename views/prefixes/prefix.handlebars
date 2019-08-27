@@ -3,7 +3,7 @@
     <a class="btn blue lighten-2">Edit Prefix</a>
     <a class="btn red lighten-2">Delete Prefix</a>
   </div>
-  <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if this.subnet}}<h6>Subnet - {{this.subnet}}</h6>{{/if}}<h6>Gateway - {{this.gateway}}</h6><h6>Prefix - {{this.prefix}}</h6>
+  <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if this.site}}<h6>Site - {{this.site}}</h6>{{else}}<h6>Site - </h6>{{/if}}{{#if this.subnet}}<h6>Subnet - {{this.subnet}}</h6>{{else}}<h6>Subnet - </h6>{{/if}}<h6>Gateway - {{this.gateway}}</h6><h6>Prefix - {{this.prefix}}</h6>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">

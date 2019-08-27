@@ -1,5 +1,6 @@
 <div class="container">
   <div class="right">
+    <a class="btn green lighten-2" id="assignPrefixBtn">Assign Prefix</a>
     <a class="btn blue lighten-2">Edit Site</a>
     <a class="btn red lighten-2">Delete Site</a>
   </div>
@@ -23,6 +24,23 @@
       </table>
     </div>
   </div>
+  <div class="z-depth-5" id="assign-prefix">
+    <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h3>
+    <br><br>
+    <form class="container" action="/prefixes/assign" method="POST" class="col">
+      <div class="row">
+        <div class="input-field">
+          <input type="text" name="prefix" id="site-prefix" data-length="50" class="autocomplete" autofocus required>
+          <label for="site-prefix">Prefix</label>
+          <input type="hidden" name="site" id="site" value="">
+        </div>
+        <div class="center-align mb-5">
+          <button class="btn" type="submit" name="assignPrefix" id="assignPrefix">Assign</button>
+          <button class="btn" type="button" name="close" id="assignPrefixClose">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
   <div class="z-depth-5" id="unassign-prefix">
     <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
     <br><br>
@@ -40,4 +58,4 @@
     </form>
   </div>
 </div>
-<script src="/js/prefixes-unassign.js"></script>
+<script src="/js/prefixes-assign.js"></script>

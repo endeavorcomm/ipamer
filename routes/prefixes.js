@@ -52,6 +52,43 @@ router.get('/prefix/:_id', (req, res) => {
     });
 });
 
+// process prefix assign form
+router.post('/assign', (req, res) => {
+  const site = req.body.site;
+  const newPrefix = req.body.prefix;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  // TODO lookup prefix id, based on prefix
+  Prefix.findOne({prefix: newPrefix}, {})
+    .then(prefixFound => {
+      let prefix = {id: prefixFound._id.toString(), prefix: prefixFound.prefix};
+
+      // update site with new prefix
+      Site.updateOne({name: site}, {$push: {prefixes: prefix}}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // site updated with Prefix!
+        }
+      });
+
+      // update prefix with site
+      Prefix.updateOne({_id: prefixFound._id.toString()}, {site: site}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // prefix updated with site!
+          res.redirect(reqURL);
+        }
+      });
+    });
+});
+
 // process prefix creation form
 router.post('/add', (req, res) => {
   const prefix = req.body.prefix;
@@ -470,7 +507,7 @@ router.post('/add', (req, res) => {
 
         // check if site was assigned
         if (site !== "") {
-          let prefixDetails = {id: prefix._id, prefix: prefix.prefix};
+          let prefixDetails = {id: prefix._id.toString(), prefix: prefix.prefix};
           // assign prefix to site
           Site.updateOne({name: site}, {$push: {prefixes: prefixDetails}}, (err, record) => {
             if (err) {
