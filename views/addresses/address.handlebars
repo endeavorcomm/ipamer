@@ -3,7 +3,7 @@
     <a class="btn blue lighten-2">Edit Description</a>
     <a class="btn red lighten-2">Delete Address</a>
   </div>
-  <h3>{{address.ip}}</h3><h6>Subnet - {{address.subnet}}</h6><h6>Gateway - {{address.gateway}}</h6><h6>Prefix - {{address.prefix}}</h6>
+  <h3>{{address.ip}}</h3>{{#if address.description}}<h6>Description - {{address.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}<h6>Subnet - {{address.subnet}}</h6><h6>Gateway - {{address.gateway}}</h6><h6>Prefix - {{address.prefix}}</h6>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -11,13 +11,12 @@
           <tr>
             <th>Status</th>
             <th>Customer</th>
-            <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>{{address.status}}</td><td id="name-{{address.id}}">{{address.customer.name}}</td><td>{{address.description}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{address.id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{address.id}}"></i></a></td>
+            <td>{{address.status}}</td><td id="name-{{address.id}}">{{address.customer.name}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{address.id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{address.id}}"></i></a></td>
           </tr>
         </tbody>
       </table>

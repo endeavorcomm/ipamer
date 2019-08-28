@@ -4,7 +4,7 @@
     <a class="btn blue lighten-2">Edit Site</a>
     <a class="btn red lighten-2">Delete Site</a>
   </div>
-  <h3 class="siteName">{{site.name}}</h3>
+  <h3 class="siteName">{{site.name}}</h3>{{#if site.description}}<h6>Description - {{site.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site.alias}}<h6>Alias - {{site.alias}}</h6>{{else}}<h6>Alias - </h6>{{/if}}
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -17,45 +17,46 @@
         <tbody>
           {{#each site.prefixes}}
           <tr>
-            <td>{{this.prefix}}</td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
+            <td id='name-{{this.id}}'>{{this.prefix}}</td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
-  </div>
-  <div class="z-depth-5" id="assign-prefix">
-    <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h3>
-    <br><br>
-    <form class="container" action="/prefixes/assign" method="POST" class="col">
-      <div class="row">
-        <div class="input-field">
-          <input type="text" name="prefix" id="site-prefix" data-length="50" class="autocomplete" autofocus required>
-          <label for="site-prefix">Prefix</label>
-          <input type="hidden" name="site" id="site" value="">
+    <div class="z-depth-5" id="assign-prefix">
+      <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h3>
+      <br><br>
+      <form class="container" action="/prefixes/assign" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="text" name="prefix" id="site-prefix" data-length="50" class="autocomplete" autofocus required>
+            <label for="site-prefix">Prefix</label>
+            <input type="hidden" name="site" id="site" value="">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="assignPrefix" id="assignPrefix">Assign</button>
+            <button class="btn" type="button" name="close" id="assignPrefixClose">Close</button>
+          </div>
         </div>
-        <div class="center-align mb-5">
-          <button class="btn" type="submit" name="assignPrefix" id="assignPrefix">Assign</button>
-          <button class="btn" type="button" name="close" id="assignPrefixClose">Close</button>
+      </form>
+    </div>
+    <div class="z-depth-5" id="unassign-prefix">
+      <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
+      <br><br>
+      <form class="container" action="/prefixes/unassign" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="hidden" name="unprefixID" id="unprefixID" value="">
+            <input type="hidden" name="unprefixName" id="unprefixName" value="">
+            <input type="hidden" name="unsite" id="unsite" value="{{site.name}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="unassignPrefix" id="unassignPrefix">Unassign</button>
+            <button class="btn" type="button" name="unclose" id="unassignPrefixClose">Close</button>
+          </div>
         </div>
-      </div>
-    </form>
-  </div>
-  <div class="z-depth-5" id="unassign-prefix">
-    <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
-    <br><br>
-    <form class="container" action="/prefixes/unassign" method="POST" class="col">
-      <div class="row">
-        <div class="input-field">
-          <input type="hidden" name="unsite" id="unsite" value="">
-          <input type="hidden" name="unsiteID" id="unsiteID" value="{{this._id}}">
-        </div>
-        <div class="center-align mb-5">
-          <button class="btn" type="submit" name="unassignPrefix" id="unassignPrefix">Unassign</button>
-          <button class="btn" type="button" name="unclose" id="unassignPrefixClose">Close</button>
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
-<script src="/js/prefixes-assign.js"></script>
+<script src="/js/prefixes-un_assign.js"></script>

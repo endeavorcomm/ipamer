@@ -70,65 +70,78 @@ router.post('/assign', (req, res) => {
     // get customer info for IP assignment
     Customer.findOne({name: customer_name}, {})
       .then(customerFound => {
-        const customer = {id: customerFound._id, name: customerFound.name};
-        
-        if (customer_name == 'Reserved') {
-          // assign customer to IP address, and assign description
-          Address.updateOne({_id: address_id}, {customer: customer, status: 'Active', description: 'Gateway IP'}, (err, record) => {
-            if (err) {
-              throw err;
-            } else {
-              // customer assigned to IP address!
-            }
-          });
+        if (customerFound == null) {
+          // customer doesn't exist
+          // set cookie for toast
+          res.cookie('iPAMxStatus', 'Create Customer First');
+          // send response
+          res.redirect(reqURL);
         } else {
-          // assign customer to IP address
-          Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
-            if (err) {
-              throw err;
-            } else {
-              // customer assigned to IP address!
-            }
+          const customer = {id: customerFound._id, name: customerFound.name};
+          if (customer_name == 'Reserved') {
+            // assign customer to IP address, and assign description
+            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active', description: 'Gateway IP'}, (err, record) => {
+              if (err) {
+                throw err;
+              } else {
+                // customer assigned to IP address!
+              }
+            });
+          } else {
+            // assign customer to IP address
+            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
+              if (err) {
+                throw err;
+              } else {
+                // customer assigned to IP address!
+              }
+            });
+          }
+          // get IP address from _id
+          Address.findOne({_id: address_id}, {ip: 2})
+          .then(ipFound => {
+            // assign IP address to customer
+            let address = {id: address_id, ip: ipFound.ip};
+            Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
+              if (err) {
+                throw err;
+              } else {
+                // customer updated with IP address!
+                res.redirect(reqURL);
+              }
+            });
           });
         }
-      });
-
-    // get IP address from _id
-    Address.findOne({_id: address_id}, {ip: 2})
-      .then(ipFound => {
-        // assign IP address to customer
-        let address = {id: address_id, ip: ipFound.ip};
-        Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
-          if (err) {
-            throw err;
-          } else {
-            // customer updated with IP address!
-            res.redirect(reqURL);
-          }
-        });
       });
   } else {
     // request came from individual customer page Assign Address button
     // need to get address_id from address
     Address.findOne({ip: address_ip}, {})
-      .then(ipFound => {
-        console.log(ipFound._id);
-        let address = {id: ipFound._id.toString(), ip: address_ip};
-        const address_id = ipFound._id;
-
-        Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
-          if (err) {
-            throw err;
-          } else {
-            // customer updated with IP address!
-          }
-        });
-
+    .then(ipFound => {
+      if (ipFound == null) {
+        // IP address doesn't exist
+        // set cookie for toast
+        res.cookie('iPAMxStatus', 'Create IP Address First');
+        // send response
+        res.redirect(reqURL);
+      } else {
         // get customer info for IP assignment
         Customer.findOne({name: customer_name}, {})
         .then(customerFound => {
           const customer = {id: customerFound._id, name: customerFound.name};
-          
+
+          let address = {id: ipFound._id.toString(), ip: address_ip};
+          const address_id = ipFound._id;
+
+          // assign ip address to customer
+          Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
+            if (err) {
+              throw err;
+            } else {
+              // customer updated with IP address!
+            }
+          });
+      
           if (customer_name == 'Reserved') {
             // assign customer to IP address, and assign description
             Address.updateOne({_id: address_id}, {customer: customer, status: 'Active', description: 'Gateway IP'}, (err, record) => {
@@ -140,7 +153,7 @@ router.post('/assign', (req, res) => {
               }
             });
           } else {
-            // assign customer to IP address
+            // assign customer to IP address without description
             Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
               if (err) {
                 throw err;
@@ -149,9 +162,10 @@ router.post('/assign', (req, res) => {
                 res.redirect(reqURL);
               }
             });
-          }
+          }          
         });
-      });
+      }
+    });
   }
 });
 
@@ -321,7 +335,7 @@ router.post('/add', (req, res) => {
             description: req.body.description
           });
           return false;
-        } else if (!addressDuplicate) {
+        } else if (addressDuplicate) {
           // ip address is a duplicate
           let message = 'IP Address already exists';
           // send response
@@ -466,7 +480,7 @@ router.post('/add', (req, res) => {
           status = 'Active';
           Customer.findOne({name: req.body.customer}, {})
             .then(customerFound => {
-              customer = {id: customerFound._id, name: customerFound.name};
+              customer = {id: customerFound._id.toString(), name: customerFound.name};
               const newAddress = new Address({
                 ip: req.body.address,
                 type: 'Unicast',
@@ -482,7 +496,7 @@ router.post('/add', (req, res) => {
               newAddress.save()
                 .then(savedAddress => {
                   if (customer.id !== "") {
-                    let addressCreated = {id: savedAddress._id, ip: savedAddress.ip};
+                    let addressCreated = {id: savedAddress._id.toString(), ip: savedAddress.ip};
                     // assign IP address to customer
                     Customer.updateOne({name: customer.name}, {$push: {addresses: addressCreated}}, (err, record) => {
                       if (err) {

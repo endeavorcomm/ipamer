@@ -4,7 +4,7 @@
     <a class="btn blue lighten-2" id="editCustomerBtn">Edit Customer</a>
     <a class="btn red lighten-2" id="deleteCustomerBtn">Delete Customer</a>
   </div>
-  <h3 class="customerName">{{customer.name}}</h3>
+  <h3 class="customerName">{{customer.name}}</h3>{{#if customer.description}}<h6>Description - {{customer.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -17,7 +17,7 @@
         <tbody>
           {{#each customer.addresses}}
           <tr>
-            <td>{{this.ip}}</td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
+            <td><a href="/addresses/address/{{this.id}}">{{this.ip}}</a></td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>

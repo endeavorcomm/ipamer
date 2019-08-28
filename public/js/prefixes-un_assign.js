@@ -1,5 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+  // initialize tooltips
+  var tooltips = document.querySelectorAll('.tooltipped');
+  M.Tooltip.init(tooltips);
+
   // initialize prefix-assign prefix field autocomplete
   var prefixAuto = document.getElementById('site-prefix');
   M.Autocomplete.init(prefixAuto);
@@ -19,6 +23,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('assign-prefix').style.display = 'block';
 
     e.preventDefault();
+  });
+
+  // add event listener to unassign prefix close button
+  const unassignPrefixClose = document.getElementById('unassignPrefixClose');
+  unassignPrefixClose.addEventListener('click', function(e) {
+    document.getElementById('unassign-prefix').style.display = 'none';
+  });
+
+  const unassignEls = document.querySelectorAll('.unassignPrefix');
+  unassignEls.forEach(function (edit) {
+    edit.addEventListener('click', function(e){
+      // TODO get ip address for popupbox header with event bubbling to parent
+      const id = e.target.id;
+
+      document.getElementById('unprefixID').value = id;
+      const prefixName = document.getElementById(`name-${id}`).innerHTML;
+      document.getElementById('unprefixName').value = prefixName;
+      //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
+      document.getElementById('unassign-prefix').style.display = 'block';
+
+      e.preventDefault();
+    });
   });
 
   // create ajax request and get a list of prefixes when assigning to a site

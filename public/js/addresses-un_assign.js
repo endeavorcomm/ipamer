@@ -11,6 +11,19 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
+  // check for cookies
+  let theCookies = document.cookie.split(';');
+  theCookies.forEach(cookie => {
+    let parseCookie = cookie.split('=');
+    if (parseCookie[0] == 'iPAMxStatus') {
+      // replace all %20s in string with a space
+      parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
+      M.toast({html: `${parseCookie[1]}`});
+      // expire cookie
+      document.cookie = "iPAMxStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+  });
+
   // add event listener to address-assign close button
   const assignCustomerClose = document.getElementById('assignCustomerClose');
   assignCustomerClose.addEventListener('click', function(e) {

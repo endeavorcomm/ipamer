@@ -63,7 +63,7 @@ router.post('/assign', (req, res) => {
   const reqHeader = reqLocation.split(`http://${reqHost}`);
   const reqURL = reqHeader[1];
 
-  // TODO lookup prefix id, based on prefix
+  // lookup prefix id, based on prefix
   Prefix.findOne({prefix: newPrefix}, {})
     .then(prefixFound => {
       let prefix = {id: prefixFound._id.toString(), prefix: prefixFound.prefix};
@@ -87,6 +87,40 @@ router.post('/assign', (req, res) => {
         }
       });
     });
+});
+
+// process prefix unassign form
+router.post('/unassign', (req, res) => {
+  const site = req.body.unsite;
+  const prefixID = req.body.unprefixID;
+  const prefixName = req.body.unprefixName;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  let prefix = {id: prefixID, prefix: prefixName};
+
+  // remove prefix from site
+  Site.updateOne({name: site}, {$pull: {prefixes: prefix}}, (err, record) => {
+    if (err) {
+      throw err;
+    } else {
+      // prefix removed from site!
+    }
+  });
+
+  // remove site from prefix
+  Prefix.updateOne({_id: prefixID}, {site: ''}, (err, record) => {
+    if (err) {
+      throw err;
+    } else {
+      // site removed from prefix!
+      res.redirect(reqURL);
+    }
+  });
 });
 
 // process prefix creation form
