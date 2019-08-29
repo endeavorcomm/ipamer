@@ -24,15 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // add event listener to address-assign close button
-  const assignCustomerClose = document.getElementById('assignCustomerClose');
-  assignCustomerClose.addEventListener('click', function(e) {
+  // add event listener to address-assign cancel button
+  const assignCustomerCancel = document.getElementById('assignCustomerCancel');
+  assignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('assign-address').style.display = 'none';
   });
 
-  // add event listener to address-unassign close button
-  const unassignCustomerClose = document.getElementById('unassignCustomerClose');
-  unassignCustomerClose.addEventListener('click', function(e) {
+  // add event listener to address-unassign cancel button
+  const unassignCustomerCancel = document.getElementById('unassignCustomerCancel');
+  unassignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-address').style.display = 'none';
   });
 
@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // TODO get ip address for popupbox header with event bubbling to parent
       const id = e.target.id;
       let uncustomerName = document.getElementById(`name-${id}`).innerHTML;
+      let unaddressIP = document.getElementById(`ip-${id}`).innerHTML;
 
       if(uncustomerName == '') {
         // no customer assigned
@@ -74,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         document.getElementById('unaddressID').value = id;
         document.getElementById('uncustomer').value = uncustomerName;
+        document.getElementById('unaddressIP').value = unaddressIP;
         //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
         document.getElementById('unassign-address').style.display = 'block';
       }

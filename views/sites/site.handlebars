@@ -17,7 +17,7 @@
         <tbody>
           {{#each site.prefixes}}
           <tr>
-            <td id='name-{{this.id}}'>{{this.prefix}}</td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
+            <td><a href="/prefixes/prefix/{{this.id}}" id='name-{{this.id}}'>{{this.prefix}}</a></td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
@@ -35,7 +35,7 @@
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignPrefix" id="assignPrefix">Assign</button>
-            <button class="btn" type="button" name="close" id="assignPrefixClose">Close</button>
+            <button class="btn" type="button" name="cancel" id="assignPrefixCancel">Cancel</button>
           </div>
         </div>
       </form>
@@ -52,7 +52,7 @@
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignPrefix" id="unassignPrefix">Unassign</button>
-            <button class="btn" type="button" name="unclose" id="unassignPrefixClose">Close</button>
+            <button class="btn" type="button" name="uncancel" id="unassignPrefixCancel">Cancel</button>
           </div>
         </div>
       </form>

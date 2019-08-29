@@ -21,15 +21,15 @@ document.addEventListener('DOMContentLoaded', function() {
   var ipAuto = document.getElementById('customer-address');
   M.Autocomplete.init(ipAuto);
 
-  // add event listener to assign address close button
-  const assignIPClose = document.getElementById('assignIPClose');
-  assignIPClose.addEventListener('click', function(e) {
+  // add event listener to assign address cancel button
+  const assignIPCancel = document.getElementById('assignIPCancel');
+  assignIPCancel.addEventListener('click', function(e) {
     document.getElementById('assign-address').style.display = 'none';
   });
 
-  // add event listener to address-unassign close button
-  const unassignCustomerClose = document.getElementById('unassignCustomerClose');
-  unassignCustomerClose.addEventListener('click', function(e) {
+  // add event listener to address-unassign cancel button
+  const unassignCustomerCancel = document.getElementById('unassignCustomerCancel');
+  unassignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-address').style.display = 'none';
   });
 
@@ -51,8 +51,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // TODO get ip address for popupbox header with event bubbling to parent
       const id = e.target.id;
       const uncustomerName = document.querySelector('.customerName').innerHTML;
+      const unIP = document.getElementById(`ip-${id}`).innerHTML;
 
       document.getElementById('unaddressID').value = id;
+      document.getElementById('unaddressIP').value = unIP;
       document.getElementById('uncustomer').value = uncustomerName;
       //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
       document.getElementById('unassign-address').style.display = 'block';

@@ -170,8 +170,10 @@ router.post('/assign', (req, res) => {
 });
 
 router.post('/unassign', (req, res) => {
-  const unassignFromCustomer = req.body.uncustomer;
-  const address_id = req.body.unaddressID;
+  const customer = req.body.uncustomer;
+  const addressID = req.body.unaddressID;
+  const addressIP = req.body.unaddressIP;
+  const removeAddress = {id: addressID, ip: addressIP};
 
   // build redirect url from headers
   const reqLocation = req.headers.referer;
@@ -181,31 +183,21 @@ router.post('/unassign', (req, res) => {
   
   // unassign customer from IP address
   const clearCustomer = {id: '', name: ''};
-  Address.updateOne({_id: address_id}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
+  Address.updateOne({_id: addressID}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
     if (err) {
       throw err;
     } else {
       // customer unassigned from IP address!
     }
   });
-  
-  // get IP address from _id
-  Customer.findOne({name: unassignFromCustomer}, {addresses: 1})
-  .then(addressesFound => {
-    // find address in array with ip id that we want to unassign
-    addressesFound.addresses.forEach(address => {
-      if (address.id == address_id) {
-        // unassign IP address from customer
-        Customer.updateOne({name: unassignFromCustomer}, {$pull: {addresses: address}}, (err, record) => {
-          if (err) {
-            throw err;
-          } else {
-            // customer updated with IP address!
-            res.redirect(reqURL);
-          }
-        });
-      }
-    });
+
+  Customer.updateOne({name: customer}, {$pull: {addresses: removeAddress}}, (err, record) => {
+    if (err) {
+      throw err;
+    } else {
+      // customer updated with IP address!
+      res.redirect(reqURL);
+    }
   });
 });
 

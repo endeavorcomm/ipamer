@@ -43,7 +43,7 @@ router.get('/prefix/:_id', (req, res) => {
           prefix: prefix[0].prefix,
           gateway: prefix[0].gateway,
           subnet: prefix[0].subnet,
-          desription: prefix[0].description,
+          description: prefix[0].description,
           system: prefix[0].system,
           site: prefix[0].site,
           address: addresses
@@ -94,6 +94,7 @@ router.post('/unassign', (req, res) => {
   const site = req.body.unsite;
   const prefixID = req.body.unprefixID;
   const prefixName = req.body.unprefixName;
+  const removePrefix = {id: prefixID, prefix: prefixName};
 
   // build redirect url from headers
   const reqLocation = req.headers.referer;
@@ -101,10 +102,8 @@ router.post('/unassign', (req, res) => {
   const reqHeader = reqLocation.split(`http://${reqHost}`);
   const reqURL = reqHeader[1];
 
-  let prefix = {id: prefixID, prefix: prefixName};
-
   // remove prefix from site
-  Site.updateOne({name: site}, {$pull: {prefixes: prefix}}, (err, record) => {
+  Site.updateOne({name: site}, {$pull: {prefixes: removePrefix}}, (err, record) => {
     if (err) {
       throw err;
     } else {

@@ -3,7 +3,7 @@
     <a class="btn blue lighten-2">Edit Prefix</a>
     <a class="btn red lighten-2">Delete Prefix</a>
   </div>
-  <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if this.site}}<h6>Site - {{this.site}}</h6>{{else}}<h6>Site - </h6>{{/if}}{{#if this.subnet}}<h6>Subnet - {{this.subnet}}</h6>{{else}}<h6>Subnet - </h6>{{/if}}<h6>Gateway - {{this.gateway}}</h6><h6>Prefix - {{this.prefix}}</h6>
+  <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if description}}<h6>Description - {{description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site}}<h6>Site - {{site}}</h6>{{else}}<h6>Site - </h6>{{/if}}{{#if subnet}}<h6>Subnet - {{subnet}}</h6>{{else}}<h6>Subnet - </h6>{{/if}}<h6>Gateway - {{gateway}}</h6><h6>Prefix - {{prefix}}</h6>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -19,7 +19,7 @@
         <tbody>
           {{#each address}}
           <tr>
-            <td><a href="/addresses/address/{{this._id}}">{{this.ip}}</td><td>{{this.status}}</td><td id="name-{{this._id}}">{{this.customer.name}}</td><td>{{this.description}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{this._id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{this._id}}"></i></a></td>
+            <td><a href="/addresses/address/{{this._id}}" id="ip-{{this._id}}">{{this.ip}}</td><td>{{this.status}}</td><td id="name-{{this._id}}">{{this.customer.name}}</td><td>{{this.description}}</td><td><a href="#" alt="Assign Customer"><i class="assignCustomer edit-item fas fa-user-plus tooltipped" data-tooltip="Assign Customer" id="{{this._id}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#" alt="Unassign Customer"><i class="unassignCustomer edit-item fas fa-user-minus tooltipped" data-tooltip="Unassign Customer" id="{{this._id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
@@ -34,11 +34,12 @@
             <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
             <label for="address-customer">Customer</label>
             <input type="hidden" name="addressID" id="addressID" value="">
+            <input type="hidden" name="addressIP" id="addressIP" value="">
             <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
-            <button class="btn" type="button" name="close" id="assignCustomerClose">Close</button>
+            <button class="btn" type="button" name="cancel" id="assignCustomerCancel">Cancel</button>
           </div>
         </div>
       </form>
@@ -50,12 +51,13 @@
         <div class="row">
           <div class="input-field">
             <input type="hidden" name="unaddressID" id="unaddressID" value="">
+            <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
             <input type="hidden" name="uncustomer" id="uncustomer" value="">
             <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
-            <button class="btn" type="button" name="unclose" id="unassignCustomerClose">Close</button>
+            <button class="btn" type="button" name="uncancel" id="unassignCustomerCancel">Cancel</button>
           </div>
         </div>
       </form>

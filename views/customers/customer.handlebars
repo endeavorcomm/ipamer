@@ -17,7 +17,7 @@
         <tbody>
           {{#each customer.addresses}}
           <tr>
-            <td><a href="/addresses/address/{{this.id}}">{{this.ip}}</a></td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
+            <td><a href="/addresses/address/{{this.id}}" id="ip-{{this.id}}">{{this.ip}}</a></td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
@@ -35,7 +35,7 @@
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignIP" id="assignIP">Assign</button>
-            <button class="btn" type="button" name="close" id="assignIPClose">Close</button>
+            <button class="btn" type="button" name="cancel" id="assignIPCancel">Cancel</button>
           </div>
         </div>
       </form>
@@ -47,12 +47,12 @@
         <div class="row">
           <div class="input-field">
             <input type="hidden" name="unaddressID" id="unaddressID" value="">
+            <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
             <input type="hidden" name="uncustomer" id="uncustomer" value="">
-            <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
           </div>
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
-            <button class="btn" type="button" name="unclose" id="unassignCustomerClose">Close</button>
+            <button class="btn" type="button" name="uncancel" id="unassignCustomerCancel">Cancel</button>
           </div>
         </div>
       </form>

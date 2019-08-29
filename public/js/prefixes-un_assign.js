@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
   var prefixAuto = document.getElementById('site-prefix');
   M.Autocomplete.init(prefixAuto);
 
-  // add event listener to assign prefix close button
-  const assignPrefixClose = document.getElementById('assignPrefixClose');
-  assignPrefixClose.addEventListener('click', function(e) {
+  // add event listener to assign prefix cancel button
+  const assignPrefixCancel = document.getElementById('assignPrefixCancel');
+  assignPrefixCancel.addEventListener('click', function(e) {
     document.getElementById('assign-prefix').style.display = 'none';
   });
 
@@ -25,18 +25,17 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
   });
 
-  // add event listener to unassign prefix close button
-  const unassignPrefixClose = document.getElementById('unassignPrefixClose');
-  unassignPrefixClose.addEventListener('click', function(e) {
+  // add event listener to unassign prefix cancel button
+  const unassignPrefixCancel = document.getElementById('unassignPrefixCancel');
+  unassignPrefixCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-prefix').style.display = 'none';
   });
 
+  // add event listeners to unassign prefix button
   const unassignEls = document.querySelectorAll('.unassignPrefix');
   unassignEls.forEach(function (edit) {
     edit.addEventListener('click', function(e){
-      // TODO get ip address for popupbox header with event bubbling to parent
       const id = e.target.id;
-
       document.getElementById('unprefixID').value = id;
       const prefixName = document.getElementById(`name-${id}`).innerHTML;
       document.getElementById('unprefixName').value = prefixName;
