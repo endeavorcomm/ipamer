@@ -201,6 +201,43 @@ router.post('/unassign', (req, res) => {
   });
 });
 
+// process address delete form
+router.post('/delete', (req, res) => {
+  const addressIP = req.body.addressIP;
+
+  // build redirect url from headers
+  const reqHost = req.headers.host;
+  const reqURL = `http://${reqHost}/prefixes/status`;
+  
+  // get customer ID and addresses from customer name
+  Address.findOne({ip: addressIP}, {})
+    .then(addressFound => {
+      if ((addressFound.customer.id != '') && (addressFound.customer.name != '')) {
+        // a customer is assigned, remove address from customer
+        // find customer and remove address
+        let removeAddress = {id: addressFound._id.toString, ip: addressFound.ip};
+        let customerID = String(addressFound.customer.id);
+        Customer.updateOne({_id: customerID}, {$pull: {addresses: removeAddress}}, (err, record) => {
+          if (err) {
+            throw err;
+          } else {
+            // address removed from customer!
+          }
+        });
+      }
+
+      //remove address
+      Address.deleteOne({_id: addressFound._id}, (err) => {
+        if (err) {
+          throw err;
+        } else {
+          // address deleted!
+          res.redirect(reqURL);
+        }
+      });
+    });
+});
+
 // process address creation form
 router.post('/add', (req, res) => {
   const prefix = req.body.prefix;

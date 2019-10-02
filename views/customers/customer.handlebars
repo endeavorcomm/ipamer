@@ -57,6 +57,22 @@
         </div>
       </form>
     </div>
+    <div class="z-depth-5" id="delete-customer">
+      <h5 class="center" id="deleteCustomerHeader">Confirm Delete</h3>
+      <h6 class="center">Are you sure you want to delete this customer?</h6>
+      <br><br>
+      <form class="container" action="/customers/delete" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="hidden" name="customerName" id="customerName" value="{{customer.name}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="deleteCustomer" id="deleteCustomer">Delete</button>
+            <button class="btn" type="button" name="cancel" id="deleteCustomerCancel">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-<script src="/js/customers-un_assign.js"></script>
+<script src="/js/customers.js"></script>

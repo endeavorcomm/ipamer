@@ -90,4 +90,45 @@ router.post('/add', (req, res) => {
 
 });
 
+// process customer delete form
+router.post('/delete', (req, res) => {
+  const customerName = req.body.customerName;
+
+  // build redirect url from headers
+  const reqHost = req.headers.host;
+  const reqURL = `http://${reqHost}/customers/status`;
+  
+  // get customer ID and addresses from customer name
+  Customer.findOne({name: customerName}, {})
+    .then(customerFound => {
+      let customerID = String(customerFound._id);
+      const customer = {id: customerID, name: customerFound.name};
+      // unassign all addresses from the customer
+      Address.find({customer: customer}, {})
+        .then(addressesFound => {
+          addressesFound.forEach((address) => {
+            // remove customer from address, reset status and clear description
+            const clearCustomer = {id: '', name: ''};
+            Address.updateOne({_id: address._id}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
+              if (err) {
+                throw err;
+              } else {
+                // customer removed from address!
+              }
+            });
+          });
+        });
+
+      //remove customer
+      Customer.deleteOne({_id: customerFound._id}, (err) => {
+        if (err) {
+          throw err;
+        } else {
+          // customer deleted!
+          res.redirect(reqURL);
+        }
+      });
+    });
+});
+
 module.exports = router;

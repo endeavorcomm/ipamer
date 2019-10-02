@@ -36,19 +36,19 @@ router.get('/prefix/:_id', (req, res) => {
     .then(prefix => {
       // query addresses in prefix
       Address.find({type: 'Unicast', prefix: prefix[0].prefix}, {}).sort({ip: 1}).collation({locale: "en_US", numericOrdering: true})
-      .then(addresses => {
-        res.render('prefixes/prefix', {
-          id: prefix[0]._id,
-          name: prefix[0].name,
-          prefix: prefix[0].prefix,
-          gateway: prefix[0].gateway,
-          subnet: prefix[0].subnet,
-          description: prefix[0].description,
-          system: prefix[0].system,
-          site: prefix[0].site,
-          address: addresses
+        .then(addresses => {
+          res.render('prefixes/prefix', {
+            id: prefix[0]._id,
+            name: prefix[0].name,
+            prefix: prefix[0].prefix,
+            gateway: prefix[0].gateway,
+            subnet: prefix[0].subnet,
+            description: prefix[0].description,
+            system: prefix[0].system,
+            site: prefix[0].site,
+            address: addresses
+          });
         });
-      });
     });
 });
 
@@ -120,6 +120,75 @@ router.post('/unassign', (req, res) => {
       res.redirect(reqURL);
     }
   });
+});
+
+// process prefix delete form
+router.post('/delete', (req, res) => {
+  const prefixName = req.body.prefixName;
+
+  // build redirect url from headers
+  const reqHost = req.headers.host;
+  const reqURL = `http://${reqHost}/prefixes/status`;
+  
+  // get prefix from prefix name
+  Prefix.findOne({name: prefixName}, {})
+    .then(prefixFound => {
+      const prefix = prefixFound.prefix;
+
+      // get all addresses that are a part of the prefix
+      Address.find({prefix: prefix}, {})
+        .then(addressesFound => {
+          addressesFound.forEach((address) => {
+            // find addresses are assigned to a customer
+            if ((address.customer.id != '') && (address.customer.name != '')) {
+              // a customer is assigned, remove address from customer
+              let removeAddress = {id: address._id.toString, ip: address.ip};
+              let customerID = address.customer.id;
+              Customer.updateOne({_id: customerID}, {$pull: {addresses: removeAddress}}, (err, record) => {
+                if (err) {
+                  throw err;
+                } else {
+                  // address removed from customer!
+                }
+              });
+            }
+
+            let addressID = address._id;
+            // remove addresses
+            Address.deleteOne({_id: addressID}, (err) => {
+              if (err) {
+                throw err;
+              } else {
+                // address deleted!
+              }
+            });
+          });
+        });
+
+      
+      // remove prefix from site
+      if (prefixFound.site != '') {
+        const removePrefix = {id: prefixFound._id.toString(), prefix: prefix};
+        // prefix is assigned to a site, remove
+        Site.updateOne({name: prefixFound.site}, {$pull: {prefixes: removePrefix}}, (err, record) => {
+          if (err) {
+            throw err;
+          } else {
+            // prefix removed from customer!
+          }
+        });
+      }
+
+      // remove prefix
+      Prefix.deleteOne({prefix: prefix}, (err) => {
+        if (err) {
+          throw err;
+        } else {
+          // prefix deleted!
+          res.redirect(reqURL);
+        }
+      });
+    });
 });
 
 // process prefix creation form
@@ -534,238 +603,99 @@ router.post('/add', (req, res) => {
       .then(prefix => {
         // define default customer address info
         const addressDefault = {id: '', name: ''};
-        const addressNetwork = {id: 'Network', name: 'Reserved'};
-        const addressBroadcast = {id: 'Broadcast', name: 'Reserved'};
-        const addressGateway = {id: 'Gateway', name: 'Reserved'};
 
-        // check if site was assigned
-        if (site !== "") {
-          let prefixDetails = {id: prefix._id.toString(), prefix: prefix.prefix};
-          // assign prefix to site
-          Site.updateOne({name: site}, {$push: {prefixes: prefixDetails}}, (err, record) => {
-            if (err) {
-              throw err;
-            } else {
-              // site updated with prefix!
+        Customer.findOne({name: 'Reserved'}, {})
+          .then(customerFound => {
+            const reservedUserID = customerFound._id;
+            const reservedUser = {id: reservedUserID, name: 'Reserved'};
+
+            // check if site was assigned
+            if (site !== "") {
+              let prefixDetails = {id: prefix._id.toString(), prefix: prefix.prefix};
+              // assign prefix to site
+              Site.updateOne({name: site}, {$push: {prefixes: prefixDetails}}, (err, record) => {
+                if (err) {
+                  throw err;
+                } else {
+                  // site updated with prefix!
+                }
+              });
             }
-          });
-        }
-        
-        // check if we should create addresses
-        if (createAddresses !== undefined) {
-          // yes, create addresses
+            
+            // check if we should create addresses
+            if (createAddresses !== undefined) {
+              // yes, create addresses
 
-          // check if prefix is IPv6 or IPv4
-          const v6 = req.body.prefix.includes("::");
-          const v4 = req.body.prefix.includes(".");
-          if (v6) {
-            // do not create addresses for IPv6
-            // TODO toaster notification for non-creation??
-            // TODO create network and broadcast addresses
-          } else if (v4) {
-            // create addresses for IPV4
+              // check if prefix is IPv6 or IPv4
+              const v6 = req.body.prefix.includes("::");
+              const v4 = req.body.prefix.includes(".");
+              if (v6) {
+                // do not create addresses for IPv6
+                // TODO toaster notification for non-creation??
+                // TODO create network and broadcast addresses
+              } else if (v4) {
+                // create addresses for IPV4
 
-            // get CIDR from prefix and convert to subnet mask
-            const prefixCIDR = getCIDR(req.body.prefix);
-            let sMask = convertCIDRToSubnet(prefixCIDR);
+                // get CIDR from prefix and convert to subnet mask
+                const prefixCIDR = getCIDR(req.body.prefix);
+                let sMask = convertCIDRToSubnet(prefixCIDR);
 
-            // create subnet array
-            let subnetArray = sMask.split(".");
+                // create subnet array
+                let subnetArray = sMask.split(".");
 
-            // create array of non-255 subnet mask values
-            let maskArray = [];
-            subnetArray.forEach((maskOctet) => {
-              if (maskOctet !== '255') {
-                maskArray.push(maskOctet);
-              }
-            })
-
-            // get network address from prefix
-            let initPrefix = req.body.prefix;
-            let netOctets = getNetworkAddress(initPrefix);
-
-            switch(maskArray.length) {
-              case 1:
-                // octet four is non-255
-                let octetFourLength1 = 256 - parseInt(maskArray[0]) - 1;
-                for (n = 0; n <= octetFourLength1; n++) {
-                  let octetFourValue1 = parseInt(netOctets[3]) + n;
-                  let ip1 = `${netOctets[0]}.${netOctets[1]}.${netOctets[2]}.${octetFourValue1}`;
-                  // add IP address into database
-                  if (n == 0) {
-                    // address is first in list, so it is the network address
-                    let newAddress = new Address({
-                      ip: ip1,
-                      type: 'Network',
-                      customer: addressNetwork,
-                      prefix: req.body.prefix,
-                      gateway: req.body.gateway,
-                      subnet: sMask,
-                      site: req.body.site,
-                      status: 'Active',
-                      description: 'Network IP'
-
-                    });
-                    newAddress.save();
-                  } else if (n == octetFourLength1) {
-                    // address is last in list, so it is the broadcast address
-                    let newAddress = new Address({
-                      ip: ip1,
-                      type: 'Broadcast',
-                      customer: addressBroadcast,
-                      prefix: req.body.prefix,
-                      gateway: req.body.gateway,
-                      subnet: sMask,
-                      site: req.body.site,
-                      status: 'Active',
-                      description: 'Broadcast IP'
-                    });
-                    newAddress.save();
-                  } else {
-                    // address is normal
-                    if (ip1 == req.body.gateway) {
-                      // create gateway address
-                      let newAddress = new Address({
-                        ip: ip1,
-                        type: 'Unicast',
-                        customer: addressGateway,
-                        prefix: req.body.prefix,
-                        gateway: 'Self',
-                        subnet: sMask,
-                        site: req.body.site,
-                        status: 'Active',
-                        description: 'Gateway IP'
-                      });
-                      newAddress.save();
-                    } else {
-                      let newAddress = new Address({
-                        ip: ip1,
-                        type: 'Unicast',
-                        customer: addressDefault,
-                        prefix: req.body.prefix,
-                        gateway: req.body.gateway,
-                        subnet: sMask,
-                        site: req.body.site,
-                        status: 'Available',
-                        description: ''
-                      });
-                      newAddress.save();
-                    }
+                // create array of non-255 subnet mask values
+                let maskArray = [];
+                subnetArray.forEach((maskOctet) => {
+                  if (maskOctet !== '255') {
+                    maskArray.push(maskOctet);
                   }
-                }
-                // send success message
-                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
-                res.redirect('/prefixes/add');
-                break;
-              case 2:
-                // octet three and four is non-255
-                let octetThreeLength2 = 256 - parseInt(maskArray[0]) - 1;
-                let octetFourLength2 = 256 - parseInt(maskArray[1]) - 1;
-                for (n = 0; n <= octetThreeLength2; n++) {
-                  let octetThreeValue2 = parseInt(netOctets[2]) + n;
-                  for (nn = 0; nn <= octetFourLength2; nn++) {
-                    let octetFourValue2 = parseInt(netOctets[3]) + nn;
-                    let ip2 = `${netOctets[0]}.${netOctets[1]}.${octetThreeValue2}.${octetFourValue2}`;
-                    // add IP address into database
-                    if (n == 0 && nn == 0) {
-                      // address is first in list, so it is the network address
-                      let newAddress = new Address({
-                        ip: ip2,
-                        type: 'Network',
-                        customer: addressNetwork,
-                        prefix: req.body.prefix,
-                        gateway: req.body.gateway,
-                        subnet: sMask,
-                        site: req.body.site,
-                        status: 'Active',
-                        description: 'Network IP'
-                      });
-                      newAddress.save();
-                    } else if (n == octetThreeLength2 && nn == octetFourLength2) {
-                      // address is last in list, so it is the broadcast address
-                      let newAddress = new Address({
-                        ip: ip2,
-                        type: 'Broadcast',
-                        customer: addressBroadcast,
-                        prefix: req.body.prefix,
-                        gateway: req.body.gateway,
-                        subnet: sMask,
-                        site: req.body.site,
-                        status: 'Active',
-                        description: 'Broadcast IP'
-                      });
-                      newAddress.save();
-                    } else {
-                      // address is normal
-                      if (ip2 == req.body.gateway) {
-                        // create gateway address
-                        let newAddress = new Address({
-                          ip: ip2,
-                          type: 'Unicast',
-                          customer: addressGateway,
-                          prefix: req.body.prefix,
-                          gateway: 'Self',
-                          subnet: sMask,
-                          site: req.body.site,
-                          status: 'Active',
-                          description: 'Gateway IP'
-                        });
-                        newAddress.save();
-                      } else {
-                        let newAddress = new Address({
-                          ip: ip2,
-                          type: 'Unicast',
-                          customer: addressDefault,
-                          prefix: req.body.prefix,
-                          gateway: req.body.gateway,
-                          subnet: sMask,
-                          site: req.body.site,
-                          status: 'Available',
-                          description: ''
-                        });
-                        newAddress.save();
-                      }
-                    }
-                  }
-                }
-                // send success message
-                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
-                res.redirect('/prefixes/add');
-                break;
-              case 3:
-                // octet two, three and four is non-255
-                let octetTwoLength3 = 256 - parseInt(maskArray[0]) - 1;
-                let octetThreeLength3 = 256 - parseInt(maskArray[1]) - 1;
-                let octetFourLength3 = 256 - parseInt(maskArray[2]) - 1;
-                for (n = 0; n <= octetTwoLength3; n++) {
-                  let octetTwoValue3 = parseInt(netOctets[1]) + n;
-                  for (nn = 0; nn <= octetThreeLength3; nn++) {
-                    let octetThreeValue3 = parseInt(netOctets[2]) + nn;
-                    for (nnn = 0; nnn <= octetFourLength3; nnn++) {
-                      let octetFourValue3 = parseInt(netOctets[3]) + nnn;
-                      let ip3 = `${netOctets[0]}.${octetTwoValue3}.${octetThreeValue3}.${octetFourValue3}`;
+                })
+
+                // get network address from prefix
+                let initPrefix = req.body.prefix;
+                let netOctets = getNetworkAddress(initPrefix);
+
+                switch(maskArray.length) {
+                  case 1:
+                    // octet four is non-255
+                    let octetFourLength1 = 256 - parseInt(maskArray[0]) - 1;
+                    for (n = 0; n <= octetFourLength1; n++) {
+                      let octetFourValue1 = parseInt(netOctets[3]) + n;
+                      let ip1 = `${netOctets[0]}.${netOctets[1]}.${netOctets[2]}.${octetFourValue1}`;
                       // add IP address into database
-                      if (n == 0 && nn == 0 && nnn == 0) {
+                      if (n == 0) {
                         // address is first in list, so it is the network address
                         let newAddress = new Address({
-                          ip: ip3,
+                          ip: ip1,
                           type: 'Network',
-                          customer: addressNetwork,
+                          customer: reservedUser,
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
                           subnet: sMask,
                           site: req.body.site,
                           status: 'Active',
                           description: 'Network IP'
+
                         });
-                        newAddress.save();
-                      }
-                      if (n == octetTwoLength3 && nn == octetThreeLength3 && nnn == octetFourLength3) {
+                        newAddress.save()
+                          .then(savedAddress => {
+                            const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                            // assign customer to IP address, and assign description
+                            Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                              if (err) {
+                                throw err;
+                              } else {
+                                // customer updated with IP address!
+                                //res.redirect(reqURL);
+                              }
+                            });
+                          });
+                      } else if (n == octetFourLength1) {
                         // address is last in list, so it is the broadcast address
                         let newAddress = new Address({
-                          ip: ip3,
+                          ip: ip1,
                           type: 'Broadcast',
-                          customer: addressBroadcast,
+                          customer: reservedUser,
                           prefix: req.body.prefix,
                           gateway: req.body.gateway,
                           subnet: sMask,
@@ -773,15 +703,27 @@ router.post('/add', (req, res) => {
                           status: 'Active',
                           description: 'Broadcast IP'
                         });
-                        newAddress.save();
+                        newAddress.save()
+                          .then(savedAddress => {
+                            const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                            // assign customer to IP address, and assign description
+                            Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                              if (err) {
+                                throw err;
+                              } else {
+                                // customer updated with IP address!
+                                //res.redirect(reqURL);
+                              }
+                            });
+                          });
                       } else {
                         // address is normal
-                        if (ip3 == req.body.gateway) {
+                        if (ip1 == req.body.gateway) {
                           // create gateway address
                           let newAddress = new Address({
-                            ip: ip3,
+                            ip: ip1,
                             type: 'Unicast',
-                            customer: addressGateway,
+                            customer: reservedUser,
                             prefix: req.body.prefix,
                             gateway: 'Self',
                             subnet: sMask,
@@ -789,10 +731,22 @@ router.post('/add', (req, res) => {
                             status: 'Active',
                             description: 'Gateway IP'
                           });
-                          newAddress.save();
+                          newAddress.save()
+                            .then(savedAddress => {
+                              const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                              // assign customer to IP address, and assign description
+                              Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                if (err) {
+                                  throw err;
+                                } else {
+                                  // customer updated with IP address!
+                                  //res.redirect(reqURL);
+                                }
+                              });
+                            });
                         } else {
                           let newAddress = new Address({
-                            ip: ip3,
+                            ip: ip1,
                             type: 'Unicast',
                             customer: addressDefault,
                             prefix: req.body.prefix,
@@ -806,35 +760,26 @@ router.post('/add', (req, res) => {
                         }
                       }
                     }
-                  }
-                }
-                // send success message
-                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
-                res.redirect('/prefixes/add');
-                break;
-              case 4:
-                // all octets are non-255
-                console.log('All octets are non-255');
-                let octetOneLength4 = 256 - parseInt(maskArray[0]) - 1;
-                let octetTwoLength4 = 256 - parseInt(maskArray[1]) - 1;
-                let octetThreeLength4 = 256 - parseInt(maskArray[2]) - 1;
-                let octetFourLength4 = 256 - parseInt(maskArray[3]) - 1;
-                for (n = 0; n <= octetOneLength4; n++) {
-                  let octetOneValue4 = parseInt(netOctets[0]) + n;
-                  for (nn = 0; nn <= octetTwoLength4; nn++) {
-                    let octetTwoValue4 = parseInt(netOctets[1]) + nn;
-                    for (nnn = 0; nnn <= octetThreeLength4; nnn++) {
-                      let octetThreeValue4 = parseInt(netOctets[2]) + nnn;
-                      for (nnnn = 0; nnnn <= octetFourLength4; nnnn++) {
-                        let octetFourValue4 = parseInt(netOctets[3]) + nnnn;
-                        let ip4 = `${octetOneValue4}.${octetTwoValue4}.${octetThreeValue4}.${octetFourValue4}`;
+                    // send success message
+                    req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
+                    res.redirect('/prefixes/add');
+                    break;
+                  case 2:
+                    // octet three and four is non-255
+                    let octetThreeLength2 = 256 - parseInt(maskArray[0]) - 1;
+                    let octetFourLength2 = 256 - parseInt(maskArray[1]) - 1;
+                    for (n = 0; n <= octetThreeLength2; n++) {
+                      let octetThreeValue2 = parseInt(netOctets[2]) + n;
+                      for (nn = 0; nn <= octetFourLength2; nn++) {
+                        let octetFourValue2 = parseInt(netOctets[3]) + nn;
+                        let ip2 = `${netOctets[0]}.${netOctets[1]}.${octetThreeValue2}.${octetFourValue2}`;
                         // add IP address into database
-                        if (n == 0 && nn == 0 && nnn == 0 && nnnn == 0) {
+                        if (n == 0 && nn == 0) {
                           // address is first in list, so it is the network address
                           let newAddress = new Address({
-                            ip: ip4,
+                            ip: ip2,
                             type: 'Network',
-                            customer: addressNetwork,
+                            customer: reservedUser,
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
                             subnet: sMask,
@@ -842,13 +787,25 @@ router.post('/add', (req, res) => {
                             status: 'Active',
                             description: 'Network IP'
                           });
-                          newAddress.save();
-                        } else if (n == octetOneLength4 && nn == octetTwoLength4 && nnn == octetThreeLength4 && nnnn == octetFourLength4) {
+                          newAddress.save()
+                            .then(savedAddress => {
+                              const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                              // assign customer to IP address, and assign description
+                              Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                if (err) {
+                                  throw err;
+                                } else {
+                                  // customer updated with IP address!
+                                  //res.redirect(reqURL);
+                                }
+                              });
+                            });
+                        } else if (n == octetThreeLength2 && nn == octetFourLength2) {
                           // address is last in list, so it is the broadcast address
                           let newAddress = new Address({
-                            ip: ip4,
+                            ip: ip2,
                             type: 'Broadcast',
-                            customer: addressBroadcast,
+                            customer: reservedUser,
                             prefix: req.body.prefix,
                             gateway: req.body.gateway,
                             subnet: sMask,
@@ -856,15 +813,27 @@ router.post('/add', (req, res) => {
                             status: 'Active',
                             description: 'Broadcast IP'
                           });
-                          newAddress.save();
+                          newAddress.save()
+                            .then(savedAddress => {
+                              const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                              // assign customer to IP address, and assign description
+                              Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                if (err) {
+                                  throw err;
+                                } else {
+                                  // customer updated with IP address!
+                                  //res.redirect(reqURL);
+                                }
+                              });
+                            });
                         } else {
                           // address is normal
-                          if (ip4 == req.body.gateway) {
+                          if (ip2 == req.body.gateway) {
                             // create gateway address
                             let newAddress = new Address({
-                              ip: ip4,
+                              ip: ip2,
                               type: 'Unicast',
-                              customer: addressGateway,
+                              customer: reservedUser,
                               prefix: req.body.prefix,
                               gateway: 'Self',
                               subnet: sMask,
@@ -872,10 +841,22 @@ router.post('/add', (req, res) => {
                               status: 'Active',
                               description: 'Gateway IP'
                             });
-                            newAddress.save();
+                            newAddress.save()
+                              .then(savedAddress => {
+                                const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                // assign customer to IP address, and assign description
+                                Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                  if (err) {
+                                    throw err;
+                                  } else {
+                                    // customer updated with IP address!
+                                    //res.redirect(reqURL);
+                                  }
+                                });
+                              });
                           } else {
                             let newAddress = new Address({
-                              ip: ip4,
+                              ip: ip2,
                               type: 'Unicast',
                               customer: addressDefault,
                               prefix: req.body.prefix,
@@ -890,85 +871,348 @@ router.post('/add', (req, res) => {
                         }
                       }
                     }
-                  }
+                    // send success message
+                    req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
+                    res.redirect('/prefixes/add');
+                    break;
+                  case 3:
+                    // octet two, three and four is non-255
+                    let octetTwoLength3 = 256 - parseInt(maskArray[0]) - 1;
+                    let octetThreeLength3 = 256 - parseInt(maskArray[1]) - 1;
+                    let octetFourLength3 = 256 - parseInt(maskArray[2]) - 1;
+                    for (n = 0; n <= octetTwoLength3; n++) {
+                      let octetTwoValue3 = parseInt(netOctets[1]) + n;
+                      for (nn = 0; nn <= octetThreeLength3; nn++) {
+                        let octetThreeValue3 = parseInt(netOctets[2]) + nn;
+                        for (nnn = 0; nnn <= octetFourLength3; nnn++) {
+                          let octetFourValue3 = parseInt(netOctets[3]) + nnn;
+                          let ip3 = `${netOctets[0]}.${octetTwoValue3}.${octetThreeValue3}.${octetFourValue3}`;
+                          // add IP address into database
+                          if (n == 0 && nn == 0 && nnn == 0) {
+                            // address is first in list, so it is the network address
+                            let newAddress = new Address({
+                              ip: ip3,
+                              type: 'Network',
+                              customer: reservedUser,
+                              prefix: req.body.prefix,
+                              gateway: req.body.gateway,
+                              subnet: sMask,
+                              site: req.body.site,
+                              status: 'Active',
+                              description: 'Network IP'
+                            });
+                            newAddress.save()
+                              .then(savedAddress => {
+                                const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                // assign customer to IP address, and assign description
+                                Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                  if (err) {
+                                    throw err;
+                                  } else {
+                                    // customer updated with IP address!
+                                    //res.redirect(reqURL);
+                                  }
+                                });
+                              });
+                          }
+                          if (n == octetTwoLength3 && nn == octetThreeLength3 && nnn == octetFourLength3) {
+                            // address is last in list, so it is the broadcast address
+                            let newAddress = new Address({
+                              ip: ip3,
+                              type: 'Broadcast',
+                              customer: reservedUser,
+                              prefix: req.body.prefix,
+                              gateway: req.body.gateway,
+                              subnet: sMask,
+                              site: req.body.site,
+                              status: 'Active',
+                              description: 'Broadcast IP'
+                            });
+                            newAddress.save()
+                              .then(savedAddress => {
+                                const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                // assign customer to IP address, and assign description
+                                Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                  if (err) {
+                                    throw err;
+                                  } else {
+                                    // customer updated with IP address!
+                                    //res.redirect(reqURL);
+                                  }
+                                });
+                              });
+                          } else {
+                            // address is normal
+                            if (ip3 == req.body.gateway) {
+                              // create gateway address
+                              let newAddress = new Address({
+                                ip: ip3,
+                                type: 'Unicast',
+                                customer: reservedUser,
+                                prefix: req.body.prefix,
+                                gateway: 'Self',
+                                subnet: sMask,
+                                site: req.body.site,
+                                status: 'Active',
+                                description: 'Gateway IP'
+                              });
+                              newAddress.save()
+                                .then(savedAddress => {
+                                  const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                  // assign customer to IP address, and assign description
+                                  Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                    if (err) {
+                                      throw err;
+                                    } else {
+                                      // customer updated with IP address!
+                                      //res.redirect(reqURL);
+                                    }
+                                  });
+                                });
+                            } else {
+                              let newAddress = new Address({
+                                ip: ip3,
+                                type: 'Unicast',
+                                customer: addressDefault,
+                                prefix: req.body.prefix,
+                                gateway: req.body.gateway,
+                                subnet: sMask,
+                                site: req.body.site,
+                                status: 'Available',
+                                description: ''
+                              });
+                              newAddress.save();
+                            }
+                          }
+                        }
+                      }
+                    }
+                    // send success message
+                    req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
+                    res.redirect('/prefixes/add');
+                    break;
+                  case 4:
+                    // all octets are non-255
+                    console.log('All octets are non-255');
+                    let octetOneLength4 = 256 - parseInt(maskArray[0]) - 1;
+                    let octetTwoLength4 = 256 - parseInt(maskArray[1]) - 1;
+                    let octetThreeLength4 = 256 - parseInt(maskArray[2]) - 1;
+                    let octetFourLength4 = 256 - parseInt(maskArray[3]) - 1;
+                    for (n = 0; n <= octetOneLength4; n++) {
+                      let octetOneValue4 = parseInt(netOctets[0]) + n;
+                      for (nn = 0; nn <= octetTwoLength4; nn++) {
+                        let octetTwoValue4 = parseInt(netOctets[1]) + nn;
+                        for (nnn = 0; nnn <= octetThreeLength4; nnn++) {
+                          let octetThreeValue4 = parseInt(netOctets[2]) + nnn;
+                          for (nnnn = 0; nnnn <= octetFourLength4; nnnn++) {
+                            let octetFourValue4 = parseInt(netOctets[3]) + nnnn;
+                            let ip4 = `${octetOneValue4}.${octetTwoValue4}.${octetThreeValue4}.${octetFourValue4}`;
+                            // add IP address into database
+                            if (n == 0 && nn == 0 && nnn == 0 && nnnn == 0) {
+                              // address is first in list, so it is the network address
+                              let newAddress = new Address({
+                                ip: ip4,
+                                type: 'Network',
+                                customer: reservedUser,
+                                prefix: req.body.prefix,
+                                gateway: req.body.gateway,
+                                subnet: sMask,
+                                site: req.body.site,
+                                status: 'Active',
+                                description: 'Network IP'
+                              });
+                              newAddress.save()
+                                .then(savedAddress => {
+                                  const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                  // assign customer to IP address, and assign description
+                                  Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                    if (err) {
+                                      throw err;
+                                    } else {
+                                      // customer updated with IP address!
+                                      //res.redirect(reqURL);
+                                    }
+                                  });
+                                });
+                            } else if (n == octetOneLength4 && nn == octetTwoLength4 && nnn == octetThreeLength4 && nnnn == octetFourLength4) {
+                              // address is last in list, so it is the broadcast address
+                              let newAddress = new Address({
+                                ip: ip4,
+                                type: 'Broadcast',
+                                customer: reservedUser,
+                                prefix: req.body.prefix,
+                                gateway: req.body.gateway,
+                                subnet: sMask,
+                                site: req.body.site,
+                                status: 'Active',
+                                description: 'Broadcast IP'
+                              });
+                              newAddress.save()
+                                .then(savedAddress => {
+                                  const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                  // assign customer to IP address, and assign description
+                                  Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                    if (err) {
+                                      throw err;
+                                    } else {
+                                      // customer updated with IP address!
+                                      //res.redirect(reqURL);
+                                    }
+                                  });
+                                });
+                            } else {
+                              // address is normal
+                              if (ip4 == req.body.gateway) {
+                                // create gateway address
+                                let newAddress = new Address({
+                                  ip: ip4,
+                                  type: 'Unicast',
+                                  customer: reservedUser,
+                                  prefix: req.body.prefix,
+                                  gateway: 'Self',
+                                  subnet: sMask,
+                                  site: req.body.site,
+                                  status: 'Active',
+                                  description: 'Gateway IP'
+                                });
+                                newAddress.save()
+                                  .then(savedAddress => {
+                                    const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                                    // assign customer to IP address, and assign description
+                                    Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                                      if (err) {
+                                        throw err;
+                                      } else {
+                                        // customer updated with IP address!
+                                        //res.redirect(reqURL);
+                                      }
+                                    });
+                                  });
+                              } else {
+                                let newAddress = new Address({
+                                  ip: ip4,
+                                  type: 'Unicast',
+                                  customer: addressDefault,
+                                  prefix: req.body.prefix,
+                                  gateway: req.body.gateway,
+                                  subnet: sMask,
+                                  site: req.body.site,
+                                  status: 'Available',
+                                  description: ''
+                                });
+                                newAddress.save();
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    // send success message
+                    req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
+                    res.redirect('/prefixes/add');
+                    break;
                 }
-                // send success message
-                req.flash('success_msg', `Prefix ${prefix.prefix} and IP Addresses added!`);
-                res.redirect('/prefixes/add');
-                break;
-            }
-          }
-        } else {
-          // IP address creation not requested, but create Network and Broadcast address
-
-          // check if prefix is IPv6 or IPv4
-          const v6 = req.body.prefix.includes("::");
-          const v4 = req.body.prefix.includes(".");
-          if (v6) {
-            // do not create addresses for IPv6
-            // TODO toaster notification for non-creation??
-          } else if (v4) {
-            // get CIDR from prefix and convert to subnet mask
-            const prefixCIDR = getCIDR(req.body.prefix);
-            let sMask = convertCIDRToSubnet(prefixCIDR);
-
-            // create subnet array
-            let subnetArray = sMask.split(".");
-
-            // create array of non-255 subnet mask values
-            let maskArray = [];
-            subnetArray.forEach((maskOctet) => {
-              if (maskOctet !== '255') {
-                maskArray.push(maskOctet);
               }
-            })
-
-            // get network and broadcast address from prefix
-            const subnetInfo = ip.cidrSubnet(req.body.prefix);
-            const networkAddress = subnetInfo.networkAddress;
-            const broadcastAddress = subnetInfo.broadcastAddress;
-
-            let nAddress = new Address({
-              ip: networkAddress,
-              type: 'Network',
-              customer: addressNetwork,
-              prefix: req.body.prefix,
-              gateway: req.body.gateway,
-              subnet: sMask,
-              site: req.body.site,
-              status: 'Active',
-              description: 'Network IP'
-            });
-
-            let bAddress = new Address({
-              ip: broadcastAddress,
-              type: 'Broadcast',
-              customer: addressBroadcast,
-              prefix: req.body.prefix,
-              gateway: req.body.gateway,
-              subnet: sMask,
-              site: req.body.site,
-              status: 'Active',
-              description: 'Broadcast IP'
-            });
-
-            if (nAddress.save() && bAddress.save()) {
-              // send success message
-              req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
-              res.redirect('/prefixes/add');
             } else {
-              // failed to add network and or broadcast address
-              req.flash('error_msg', `Failed to add prefix. Error is ${err}`);
-              res.render('prefixes/add');
+              // IP address creation not requested, but create Network and Broadcast address
+
+              // check if prefix is IPv6 or IPv4
+              const v6 = req.body.prefix.includes("::");
+              const v4 = req.body.prefix.includes(".");
+              if (v6) {
+                // do not create addresses for IPv6
+                // TODO toaster notification for non-creation??
+              } else if (v4) {
+                // get CIDR from prefix and convert to subnet mask
+                const prefixCIDR = getCIDR(req.body.prefix);
+                let sMask = convertCIDRToSubnet(prefixCIDR);
+
+                // create subnet array
+                let subnetArray = sMask.split(".");
+
+                // create array of non-255 subnet mask values
+                let maskArray = [];
+                subnetArray.forEach((maskOctet) => {
+                  if (maskOctet !== '255') {
+                    maskArray.push(maskOctet);
+                  }
+                })
+
+                // get network and broadcast address from prefix
+                const subnetInfo = ip.cidrSubnet(req.body.prefix);
+                const networkAddress = subnetInfo.networkAddress;
+                const broadcastAddress = subnetInfo.broadcastAddress;
+
+                let nAddress = new Address({
+                  ip: networkAddress,
+                  type: 'Network',
+                  customer: reservedUser,
+                  prefix: req.body.prefix,
+                  gateway: req.body.gateway,
+                  subnet: sMask,
+                  site: req.body.site,
+                  status: 'Active',
+                  description: 'Network IP'
+                });
+
+                const nAddressSaved = nAddress.save()
+                  .then(savedAddress => {
+                    const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                    // assign customer to IP address, and assign description
+                    Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                      if (err) {
+                        throw err;
+                      } else {
+                        // customer updated with IP address!
+                        //res.redirect(reqURL);
+                      }
+                    });
+                  });
+
+                let bAddress = new Address({
+                  ip: broadcastAddress,
+                  type: 'Broadcast',
+                  customer: reservedUser,
+                  prefix: req.body.prefix,
+                  gateway: req.body.gateway,
+                  subnet: sMask,
+                  site: req.body.site,
+                  status: 'Active',
+                  description: 'Broadcast IP'
+                });
+
+                const bAddressSaved = bAddress.save()
+                  .then(savedAddress => {
+                    const address = {id: savedAddress._id.toString(), ip: savedAddress.ip};
+                    // assign customer to IP address, and assign description
+                    Customer.updateOne({name: 'Reserved'}, {$push: {addresses: address}}, (err, record) => {
+                      if (err) {
+                        throw err;
+                      } else {
+                        // customer updated with IP address!
+                        //res.redirect(reqURL);
+                      }
+                    });
+                  });
+
+                if (nAddressSaved && bAddressSaved) {
+                  // send success message
+                  req.flash('success_msg', `Prefix ${prefix.prefix} added!`);
+                  res.redirect('/prefixes/add');
+                } else {
+                  // failed to add network and or broadcast address
+                  req.flash('error_msg', `Failed to add prefix. Error is ${err}`);
+                  res.render('prefixes/add');
+                }
+              }
             }
-          }
-        }
-      })
-      .catch(err => {
-        req.flash('error_msg', `Failed to add prefix. Error is ${err}`);
-        res.render('prefixes/add');
-        return;
-      });
+          });
+        })
+        .catch(err => {
+          req.flash('error_msg', `Failed to add prefix. Error is ${err}`);
+          res.render('prefixes/add');
+          return;
+        });
   }
 });
 

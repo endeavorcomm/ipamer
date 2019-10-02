@@ -44,6 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
   });
 
+  // add event listenter to delete customer button
+  document.getElementById('deleteCustomerBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('delete-customer').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to delete customer cancel button
+  const deleteCustomerCancel = document.getElementById('deleteCustomerCancel');
+  deleteCustomerCancel.addEventListener('click', function(e) {
+    document.getElementById('delete-customer').style.display = 'none';
+  });
+
   // add event listenters to address action icons
   const unassignEls = document.querySelectorAll('.unassignIP');
   unassignEls.forEach(function (edit) {

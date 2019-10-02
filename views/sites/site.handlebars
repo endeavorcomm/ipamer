@@ -2,7 +2,7 @@
   <div class="right">
     <a class="btn green lighten-2" id="assignPrefixBtn">Assign Prefix</a>
     <a class="btn blue lighten-2">Edit Site</a>
-    <a class="btn red lighten-2">Delete Site</a>
+    <a class="btn red lighten-2" id="deleteSiteBtn">Delete Site</a>
   </div>
   <h3 class="siteName">{{site.name}}</h3>{{#if site.description}}<h6>Description - {{site.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site.alias}}<h6>Alias - {{site.alias}}</h6>{{else}}<h6>Alias - </h6>{{/if}}
   <div class="row mt-4">
@@ -57,6 +57,22 @@
         </div>
       </form>
     </div>
+    <div class="z-depth-5" id="delete-site">
+      <h5 class="center" id="deleteSiteHeader">Confirm Delete</h3>
+      <h6 class="center">Deleting this site will unassign all of its prefixes as well!</h6>
+      <br><br>
+      <form class="container" action="/sites/delete" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="hidden" name="siteName" id="siteName" value="{{site.name}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="deleteSite" id="deleteSite">Delete</button>
+            <button class="btn" type="button" name="cancel" id="deleteSiteCancel">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-<script src="/js/prefixes-un_assign.js"></script>
+<script src="/js/sites.js"></script>

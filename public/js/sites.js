@@ -46,6 +46,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // add event listenter to delete site button
+  document.getElementById('deleteSiteBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('delete-site').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to delete site cancel button
+  const deleteSiteCancel = document.getElementById('deleteSiteCancel');
+  deleteSiteCancel.addEventListener('click', function(e) {
+    document.getElementById('delete-site').style.display = 'none';
+  });
+
   // create ajax request and get a list of prefixes when assigning to a site
   var xhrPrefix = new XMLHttpRequest();
   xhrPrefix.open('GET', 'http://localhost/getAvailPrefixes', true);

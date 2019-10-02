@@ -36,6 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('unassign-address').style.display = 'none';
   });
 
+  // add event listenter to delete prefix button
+  document.getElementById('deletePrefixBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('delete-prefix').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to delete prefix cancel button
+  const deletePrefixCancel = document.getElementById('deletePrefixCancel');
+  deletePrefixCancel.addEventListener('click', function(e) {
+    document.getElementById('delete-prefix').style.display = 'none';
+  });
+
   // add event listenters to address action icons
   const assignEls = document.querySelectorAll('.assignCustomer');
   assignEls.forEach(function (edit) {

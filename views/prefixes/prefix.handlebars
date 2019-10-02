@@ -1,7 +1,7 @@
 <div class="container">
   <div class="right">
     <a class="btn blue lighten-2">Edit Prefix</a>
-    <a class="btn red lighten-2">Delete Prefix</a>
+    <a class="btn red lighten-2" id="deletePrefixBtn">Delete Prefix</a>
   </div>
   <h3>{{name}} {{#if system}} - {{system}} {{/if}}</h3>{{#if description}}<h6>Description - {{description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site}}<h6>Site - {{site}}</h6>{{else}}<h6>Site - </h6>{{/if}}{{#if subnet}}<h6>Subnet - {{subnet}}</h6>{{else}}<h6>Subnet - </h6>{{/if}}<h6>Gateway - {{gateway}}</h6><h6>Prefix - {{prefix}}</h6>
   <div class="row mt-4">
@@ -62,6 +62,22 @@
         </div>
       </form>
     </div>
+    <div class="z-depth-5" id="delete-prefix">
+      <h5 class="center" id="deletePrefixHeader">Confirm Delete</h3>
+      <h6 class="center">Deleting this prefix will delete all of its IPs as well!</h6>
+      <br><br>
+      <form class="container" action="/prefixes/delete" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="hidden" name="prefixName" id="prefixName" value="{{name}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="deletePrefix" id="deletePrefix">Delete</button>
+            <button class="btn" type="button" name="cancel" id="deletePrefixCancel">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-<script src="/js/addresses-un_assign.js"></script>
+<script src="/js/prefixes.js"></script>
