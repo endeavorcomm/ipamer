@@ -15,7 +15,7 @@ router.get('/add', (req, res) => {
 // customer status route
 router.get('/status', (req, res) => {
   // query customers
-  Customer.find({}, {}).sort({name: 1})
+  Customer.find({name: {$ne:'Reserved'}}, {}).sort({name: 1})
     .then(customers => {
       res.render('customers/status', {
         customer: customers
@@ -90,6 +90,22 @@ router.post('/add', (req, res) => {
 
 });
 
+// process customer edit form
+router.post('/edit', (req, res) => {
+  const customerID = req.body.customerID;
+  const customerName = req.body.customerName;
+  const customerDesc = req.body.customerDescription;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  Customer.updateOne({_id: customerID}, {name: customerName, description: customerDesc})
+    .then(ok => {res.redirect(reqURL);});
+});
+
 // process customer delete form
 router.post('/delete', (req, res) => {
   const customerName = req.body.customerName;
@@ -125,6 +141,8 @@ router.post('/delete', (req, res) => {
           throw err;
         } else {
           // customer deleted!
+          // set cookie for toast
+          res.cookie('IPAMerStatus', 'Customer Deleted');
           res.redirect(reqURL);
         }
       });

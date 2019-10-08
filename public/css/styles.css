@@ -40,6 +40,35 @@ td {
   font-size: 1rem;
 }
 
+.input-group {
+  display: inline-table;
+}
+
+.input-group-btn {
+  display: table-cell;
+  position: relative;
+  font-size: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+  width: auto;
+}
+
+.input-group-field {
+  width: auto !important;
+}
+
+.input-group-icon {
+  position: relative;
+  top: -12px;
+}
+
+.input-group-inner-btn {
+  padding: 0 8px !important;
+  background-color: #0277bd;
+  border: none;
+  box-shadow: none;
+}
+
 .mb-2 {
   margin-bottom: .5rem;
 }
@@ -96,102 +125,27 @@ td {
   padding: 0;
 }
 
+.popup-hidden {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  background-color: #fafafa;
+  padding: 0;
+  max-height: 70%;
+  width: 55%;
+  margin: auto;
+  overflow-y: auto;
+  border-radius: 2px;
+  will-change: top, opacity;
+}
+
 #alert_msg {
   display: none;
 }
 
-#assign-address {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
-#assign-prefix {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
 #butInstall {
   display: none;
-}
-
-#delete-address {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
-#delete-customer {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
-#delete-prefix {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
-#delete-site {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
 }
 
 #fabAddressLabel {
@@ -248,32 +202,8 @@ td {
   padding: 5px 10px;
 }
 
-#unassign-address {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
-}
-
-#unassign-prefix {
-  display: none;
-  position: fixed;
-  left: 0;
-  right: 0;
-  background-color: #fafafa;
-  padding: 0;
-  max-height: 70%;
-  width: 55%;
-  margin: auto;
-  overflow-y: auto;
-  border-radius: 2px;
-  will-change: top, opacity;
+@media screen and (max-width: 600px) {
+  #search {
+    width: 100px;
+  }
 }

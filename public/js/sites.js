@@ -8,6 +8,19 @@ document.addEventListener('DOMContentLoaded', function() {
   var prefixAuto = document.getElementById('site-prefix');
   M.Autocomplete.init(prefixAuto);
 
+  // // check for cookies
+  // let theCookies = document.cookie.split(';');
+  // theCookies.forEach(cookie => {
+  //   let parseCookie = cookie.split('=');
+  //   if (parseCookie[0] == 'IPAMerStatus') {
+  //     // replace all %20s in string with a space
+  //     parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
+  //     M.toast({html: `${parseCookie[1]}`});
+  //     // expire cookie
+  //     document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  //   }
+  // });
+
   // add event listener to assign prefix cancel button
   const assignPrefixCancel = document.getElementById('assignPrefixCancel');
   assignPrefixCancel.addEventListener('click', function(e) {
@@ -44,6 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
       e.preventDefault();
     });
+  });
+
+  // add event listenter to edit site button
+  document.getElementById('editSiteBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('edit-site').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to edit site cancel button
+  const editSiteCancel = document.getElementById('editSiteCancel');
+  editSiteCancel.addEventListener('click', function(e) {
+    document.getElementById('edit-site').style.display = 'none';
   });
 
   // add event listenter to delete site button

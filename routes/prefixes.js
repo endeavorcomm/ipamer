@@ -122,6 +122,101 @@ router.post('/unassign', (req, res) => {
   });
 });
 
+// process prefix edit form
+router.post('/edit', (req, res) => {
+  const prefixID = req.body.prefixID;
+  const prefixName = req.body.prefixName;
+  const prefixSystem = req.body.prefixSystem;
+  const prefixDesc = req.body.prefixDescription;
+  const prefixSubnet = req.body.prefixSubnet;
+  const prefix = req.body.prefixPrefix;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  const cidrSubnetMatches = validateCIDRMatches(prefixSubnet);
+  
+  if (cidrSubnetMatches) {
+    Prefix.updateOne({_id: prefixID}, {name: prefixName, description: prefixDesc, system: prefixSystem, subnet: prefixSubnet})
+      .then(ok => {res.redirect(reqURL);});
+  }
+
+  function getCIDR(prefix) {
+    // replace CIDR / with . to prepare for array
+    let modPrefix = prefix.replace("/", ".");
+
+    // create netblock array
+    let cidr = modPrefix.split(".");
+
+    // get CIDR from netblock array
+    cidr.splice(0,4);
+
+    return cidr;
+  }
+
+  function validateCIDRMatches(subnet) {
+    // if subnet is filled in, validate that it matches CIDR in prefix
+    if (subnet !== '') {
+      // subnet was defined in form
+
+      const cidr = parseInt(getCIDR(prefix));
+      const sub = subnet;
+      // create subnet array
+      let subnetArray = sub.split(".");
+
+      // calculate number of bits that subnet represents
+      let bits = 0;
+      subnetArray.forEach((mask) => {
+        mask = parseInt(mask);
+        switch(mask) {
+          case 255:
+            bits += 8;
+            break;
+          case 254:
+            bits += 7;
+            break;
+          case 252:
+            bits += 6;
+            break;
+          case 248:
+            bits += 5;
+            break;
+          case 240:
+            bits += 4;
+            break;
+          case 224:
+            bits += 3;
+            break;
+          case 192:
+            bits += 2;
+            break;
+          case 128:
+            bits += 1;
+            break;
+          default:
+              break;
+        }
+        return bits;
+      });
+
+      if (cidr !== bits) {
+        // don't match, set cookie for toast
+        res.cookie('IPAMerStatus', 'Subnet Doesn\'t Match CIDR');
+        return false;
+      } else {
+        // cidr and bits match, continue validations
+        return true;
+      }
+    } else {
+      // subnet not defined, continue validations
+      return true;
+    }
+  }
+});
+
 // process prefix delete form
 router.post('/delete', (req, res) => {
   const prefixName = req.body.prefixName;
@@ -134,6 +229,18 @@ router.post('/delete', (req, res) => {
   Prefix.findOne({name: prefixName}, {})
     .then(prefixFound => {
       const prefix = prefixFound.prefix;
+
+      // remove prefix
+      Prefix.deleteOne({prefix: prefix}, (err) => {
+        if (err) {
+          throw err;
+        } else {
+          // prefix deleted!
+          // set cookie for toast
+          res.cookie('IPAMerStatus', 'Prefix Deleted');
+          res.redirect(reqURL);
+        }
+      });
 
       // get all addresses that are a part of the prefix
       Address.find({prefix: prefix}, {})
@@ -178,16 +285,6 @@ router.post('/delete', (req, res) => {
           }
         });
       }
-
-      // remove prefix
-      Prefix.deleteOne({prefix: prefix}, (err) => {
-        if (err) {
-          throw err;
-        } else {
-          // prefix deleted!
-          res.redirect(reqURL);
-        }
-      });
     });
 });
 
@@ -213,10 +310,15 @@ router.post('/add', (req, res) => {
   const prefixIsValid = validatePrefix(prefix);
   const gatewayIsValid = validateGateway(gateway, prefix);
   const typeIsValid = validateType();
-  const siteIsValid = validateSite();
 
-  if (cidrSubnetMatches && prefixIsValid && gatewayIsValid && typeIsValid && siteIsValid) {  
-    createPrefix();
+  if (cidrSubnetMatches && prefixIsValid && gatewayIsValid && typeIsValid) { 
+    if ( (site == null || site == '') ) {
+      // site not defined, continue as if true
+      createPrefix();
+    } else {
+      // site is defined, make sure it matches an existing site
+      validateSite();
+    }
   }
 
   function getNetworkAddress(prefix) {
@@ -537,54 +639,46 @@ router.post('/add', (req, res) => {
   }
 
   function validateSite() {
-    if (site !== null) {
-      // Check if typed in site matches an existing site
-      const siteExists = Site.findOne({name: new RegExp('\\b' + site + '\\b', 'i')})
-      .then(site => {
-        if(site !== null) {
-          // site exists
-          return true;
+    // Check if typed in site matches an existing site
+    Site.findOne({name: new RegExp('\\b' + site + '\\b', 'i')})
+    .then(site => {
+      if(site !== null) {
+        // site exists
+        createPrefix();
+      } else {
+        // doesn't match existing site
+        let message = 'Site Doesn\'t Exist. Please select an available site or create a new one';
+        if (type == 'static') {
+          // send response and set checked for static radio button
+          res.render('prefixes/add', {
+            error_msg: message,
+            name: req.body.name,
+            static: req.body.type,
+            createAddresses: req.body.createAddresses,
+            prefix: req.body.prefix,
+            gateway: req.body.gateway,
+            subnet: req.body.subnet,
+            description: req.body.description,
+            system: req.body.system,
+            site: ''
+          });
         } else {
-          // doesn't match existing site
-          let message = 'Site Doesn\'t Exist. Please select an available site or create a new one';
-          if (type == 'static') {
-            // send response and set checked for static radio button
-            res.render('prefixes/add', {
-              error_msg: message,
-              name: req.body.name,
-              static: req.body.type,
-              createAddresses: req.body.createAddresses,
-              prefix: req.body.prefix,
-              gateway: req.body.gateway,
-              subnet: req.body.subnet,
-              description: req.body.description,
-              system: req.body.system,
-              site: req.body.site
-            });
-            return false;
-          } else {
-            // send response and set checked for dhcp radio button
-            res.render('prefixes/add', {
-              error_msg: message,
-              name: req.body.name,
-              dhcp: req.body.type,
-              createAddresses: req.body.createAddresses,
-              prefix: req.body.prefix,
-              gateway: req.body.gateway,
-              subnet: req.body.subnet,
-              description: req.body.description,
-              system: req.body.system,
-              site: req.body.site
-            });
-            return false;
-          }
+          // send response and set checked for dhcp radio button
+          res.render('prefixes/add', {
+            error_msg: message,
+            name: req.body.name,
+            dhcp: req.body.type,
+            createAddresses: req.body.createAddresses,
+            prefix: req.body.prefix,
+            gateway: req.body.gateway,
+            subnet: req.body.subnet,
+            description: req.body.description,
+            system: req.body.system,
+            site: ''
+          });
         }
-      });
-      return siteExists;
-    } else {
-      // site not defined in form, continue
-      return true;
-    }
+      }
+    });
   } 
 
   function createPrefix() {

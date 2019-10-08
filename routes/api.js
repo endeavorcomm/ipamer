@@ -12,7 +12,7 @@ Site = require('../models/Site');
 
 // default route
 router.get('/', (req, res) => {
-  res.send('Welcome to the ipamx API');
+  res.send('Welcome to the IPAMer API');
 });
 
 // addresses route

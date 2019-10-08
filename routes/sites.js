@@ -24,12 +24,16 @@ router.get('/status', (req, res) => {
 router.get('/site/:_id', (req, res) => {
   const _id = req.params._id;
 
-  // query site
+  // query site and prefixes
   Site.findOne({_id: _id}, {})
     .then(site => {
-      res.render('sites/site', {
-        site: site
-      });
+      Prefix.find({site: site.name}, {})
+        .then(prefixes => {
+          res.render('sites/site', {
+            site: site,
+            prefixes: prefixes
+          });
+        });
     });
 });
 
@@ -73,6 +77,38 @@ router.post('/add', (req, res) => {
     });
 });
 
+// process site edit form
+router.post('/edit', (req, res) => {
+  const siteID = req.body.siteID;
+  const siteName = req.body.siteName;
+  const siteAlias = req.body.siteAlias;
+  const siteDesc = req.body.siteDescription;
+  const previousSiteName = req.body.siteCurrent;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  Site.updateOne({_id: siteID}, {name: siteName, description: siteDesc, alias: siteAlias})
+    .then(ok => {res.redirect(reqURL);});
+
+  Prefix.find({site: previousSiteName}, {})
+    .then(prefixesFound => {
+      prefixesFound.forEach((prefix) => {
+        // change site name to changed name
+        Prefix.updateOne({_id: prefix._id.toString()}, {site: siteName}, (err, record) => {
+          if (err) {
+            throw err;
+          } else {
+            // site changed for prefix!
+          }
+        });
+      });
+    });
+});
+
 // process site delete form
 router.post('/delete', (req, res) => {
   const siteName = req.body.siteName;
@@ -86,7 +122,19 @@ router.post('/delete', (req, res) => {
     .then(siteFound => {
       const site = siteFound.name;
 
-      // get all prefixe that are assigned to the site
+      // remove site
+      Site.deleteOne({name: site}, (err) => {
+        if (err) {
+          throw err;
+        } else {
+          // site deleted!
+          // set cookie for toast
+          res.cookie('IPAMerStatus', 'Site Deleted');
+          res.redirect(reqURL);
+        }
+      });
+
+      // get all prefixes that are assigned to the site
       Prefix.find({site: site}, {})
         .then(prefixesFound => {
           prefixesFound.forEach((prefix) => {
@@ -102,16 +150,6 @@ router.post('/delete', (req, res) => {
             }
           });
         });
-
-      // remove site
-      Site.deleteOne({name: site}, (err) => {
-        if (err) {
-          throw err;
-        } else {
-          // site deleted!
-          res.redirect(reqURL);
-        }
-      });
     });
 });
 

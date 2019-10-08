@@ -89,6 +89,22 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
+app.post('/search', (req, res) => {
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+
+  const searchParam = req.body.search;
+  let search = new RegExp(searchParam,'i');
+  Customer.find({name: search}, 'addresses name description').sort({name: 1})
+    .then(results => {
+      res.render('search', {
+        result: results,
+        host: reqHeader
+      });
+    });
+});
+
 app.get('/findPrefix', (req, res) => {
   const prefix = req.query.prefix;
   Prefix.findOne({prefix: prefix}, {prefix: 3, gateway: 4, subnet: 5, site: 8, _id: 0})

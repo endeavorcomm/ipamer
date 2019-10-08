@@ -23,7 +23,7 @@
         </tbody>
       </table>
     </div>
-    <div class="z-depth-5" id="assign-address">
+    <div class="z-depth-5 popup-hidden" id="assign-address">
       <h5 class="center" id="assignIPHeader">Assign IP to Customer</h3>
       <br><br>
       <form class="container" action="/addresses/assign" method="POST" class="col">
@@ -40,7 +40,7 @@
         </div>
       </form>
     </div>
-    <div class="z-depth-5" id="unassign-address">
+    <div class="z-depth-5 popup-hidden" id="unassign-address">
       <h5 class="center" id="unassignIPHeader">Unassign IP from Customer</h3>
       <br><br>
       <form class="container" action="/addresses/unassign" method="POST" class="col">
@@ -57,7 +57,23 @@
         </div>
       </form>
     </div>
-    <div class="z-depth-5" id="delete-customer">
+    <div class="z-depth-5 popup-hidden" id="edit-customer">
+      <h5 class="center" id="editCustomerHeader">Edit Customer</h3>
+      <form class="container" action="/customers/edit" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="text" name="customerName" id="customerName" placeholder="Name" value="{{customer.name}}">
+            <input type="text" name="customerDescription" id="customerDescription" placeholder="Description" value="{{customer.description}}">
+            <input type="hidden" name="customerID" id="customerID" value="{{customer._id}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="editCustomer" id="editCustomer">Submit</button>
+            <button class="btn" type="button" name="cancel" id="editCustomerCancel">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="z-depth-5 popup-hidden" id="delete-customer">
       <h5 class="center" id="deleteCustomerHeader">Confirm Delete</h3>
       <h6 class="center">Are you sure you want to delete this customer?</h6>
       <br><br>

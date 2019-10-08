@@ -1,0 +1,13 @@
+<div class="container">
+  <h4>Results</h4>
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      {{#if result}}
+        {{#each result}}
+          <a href="{{host}}/customers/customer/{{this._id}}"><h5>{{this.name}}</h5></a>
+        {{/each}}
+      {{else}}<h5>No Customers Found</h5>
+      {{/if}}
+    </div>
+  </div>
+</div>

@@ -73,7 +73,7 @@ router.post('/assign', (req, res) => {
         if (customerFound == null) {
           // customer doesn't exist
           // set cookie for toast
-          res.cookie('iPAMxStatus', 'Create Customer First');
+          res.cookie('IPAMerStatus', 'Create Customer First');
           // send response
           res.redirect(reqURL);
         } else {
@@ -87,6 +87,20 @@ router.post('/assign', (req, res) => {
                 // customer assigned to IP address!
               }
             });
+
+            // change Gateway IP of prefix
+            Address.findOne({_id: address_id}, {})
+              .then(addressFound => {
+                const prefix = addressFound.prefix;
+                const gateway = addressFound.ip;
+                Prefix.updateOne({prefix: prefix}, {gateway: gateway}, (err, record) => {
+                  if (err) {
+                    throw err;
+                  } else {
+                    // prefix's gateway updated
+                  }
+                });
+              });
           } else {
             // assign customer to IP address
             Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
@@ -107,6 +121,8 @@ router.post('/assign', (req, res) => {
                 throw err;
               } else {
                 // customer updated with IP address!
+                // set cookie for toast
+                res.cookie('IPAMerStatus', 'Address Assigned');
                 res.redirect(reqURL);
               }
             });
@@ -121,7 +137,7 @@ router.post('/assign', (req, res) => {
       if (ipFound == null) {
         // IP address doesn't exist
         // set cookie for toast
-        res.cookie('iPAMxStatus', 'Create IP Address First');
+        res.cookie('IPAMerStatus', 'Create IP Address First');
         // send response
         res.redirect(reqURL);
       } else {
@@ -196,9 +212,41 @@ router.post('/unassign', (req, res) => {
       throw err;
     } else {
       // customer updated with IP address!
+      // set cookie for toast
+      res.cookie('IPAMerStatus', 'Address Unassigned');
       res.redirect(reqURL);
     }
   });
+
+  if (customer == 'Reserved') {
+    // change Gateway IP of prefix
+    Address.findOne({_id: addressID}, {})
+    .then(addressFound => {
+      const prefix = addressFound.prefix;
+      Prefix.updateOne({prefix: prefix}, {gateway: ''}, (err, record) => {
+        if (err) {
+          throw err;
+        } else {
+          // prefix's gateway cleared
+        }
+      });
+    });
+  }
+});
+
+// process address edit form
+router.post('/edit', (req, res) => {
+  const addressID = req.body.addressID;
+  const addressDesc = req.body.addressDescription;
+
+  // build redirect url from headers
+  const reqLocation = req.headers.referer;
+  const reqHost = req.headers.host;
+  const reqHeader = reqLocation.split(`http://${reqHost}`);
+  const reqURL = reqHeader[1];
+
+  Address.updateOne({_id: addressID}, {description: addressDesc})
+    .then(ok => {res.redirect(reqURL);});
 });
 
 // process address delete form
@@ -232,6 +280,8 @@ router.post('/delete', (req, res) => {
           throw err;
         } else {
           // address deleted!
+          // set cookie for toast
+          res.cookie('IPAMerStatus', 'Address Deleted');
           res.redirect(reqURL);
         }
       });

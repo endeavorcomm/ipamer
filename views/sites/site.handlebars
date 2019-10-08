@@ -1,7 +1,7 @@
 <div class="container">
   <div class="right">
     <a class="btn green lighten-2" id="assignPrefixBtn">Assign Prefix</a>
-    <a class="btn blue lighten-2">Edit Site</a>
+    <a class="btn blue lighten-2" id="editSiteBtn">Edit Site</a>
     <a class="btn red lighten-2" id="deleteSiteBtn">Delete Site</a>
   </div>
   <h3 class="siteName">{{site.name}}</h3>{{#if site.description}}<h6>Description - {{site.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site.alias}}<h6>Alias - {{site.alias}}</h6>{{else}}<h6>Alias - </h6>{{/if}}
@@ -11,19 +11,22 @@
         <thead class="grey lighten-3">
           <tr>
             <th>Prefix</th>
+            <th>Type</th>
+            <th>System</th>
+            <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {{#each site.prefixes}}
+          {{#each prefixes}}
           <tr>
-            <td><a href="/prefixes/prefix/{{this.id}}" id='name-{{this.id}}'>{{this.prefix}}</a></td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
+            <td><a href="/prefixes/prefix/{{this.id}}" id='name-{{this.id}}'>{{this.prefix}}</a></td><td>{{this.type}}</td><td>{{this.system}}</td><td>{{this.description}}</td><td><a href="#" alt="Unassign Prefix"><i class="unassignPrefix edit-item fas fa-trash tooltipped" data-tooltip="Unassign Prefix" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
-    <div class="z-depth-5" id="assign-prefix">
+    <div class="z-depth-5 popup-hidden" id="assign-prefix">
       <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h3>
       <br><br>
       <form class="container" action="/prefixes/assign" method="POST" class="col">
@@ -40,7 +43,7 @@
         </div>
       </form>
     </div>
-    <div class="z-depth-5" id="unassign-prefix">
+    <div class="z-depth-5 popup-hidden" id="unassign-prefix">
       <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
       <br><br>
       <form class="container" action="/prefixes/unassign" method="POST" class="col">
@@ -57,7 +60,25 @@
         </div>
       </form>
     </div>
-    <div class="z-depth-5" id="delete-site">
+    <div class="z-depth-5 popup-hidden" id="edit-site">
+      <h5 class="center" id="editSiteHeader">Edit Site</h3>
+      <form class="container" action="/sites/edit" method="POST" class="col">
+        <div class="row">
+          <div class="input-field">
+            <input type="text" name="siteName" id="siteName" placeholder="Name" value="{{site.name}}">
+            <input type="text" name="siteDescription" id="siteDescription" placeholder="Description" value="{{site.description}}">
+            <input type="text" name="siteAlias" id="siteAlias" placeholder="Alias" value="{{site.alias}}">
+            <input type="hidden" name="siteCurrent" id="siteCurrent" value="{{site.name}}">
+            <input type="hidden" name="siteID" id="siteID" value="{{site._id}}">
+          </div>
+          <div class="center-align mb-5">
+            <button class="btn" type="submit" name="editSite" id="editSite">Submit</button>
+            <button class="btn" type="button" name="cancel" id="editSiteCancel">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="z-depth-5 popup-hidden" id="delete-site">
       <h5 class="center" id="deleteSiteHeader">Confirm Delete</h3>
       <h6 class="center">Deleting this site will unassign all of its prefixes as well!</h6>
       <br><br>

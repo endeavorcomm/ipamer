@@ -4,18 +4,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
-  // check for cookies
-  let theCookies = document.cookie.split(';');
-  theCookies.forEach(cookie => {
-    let parseCookie = cookie.split('=');
-    if (parseCookie[0] == 'iPAMxStatus') {
-      // replace all %20s in string with a space
-      parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
-      M.toast({html: `${parseCookie[1]}`});
-      // expire cookie
-      document.cookie = "iPAMxStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-  });
+  // // check for cookies
+  // let theCookies = document.cookie.split(';');
+  // theCookies.forEach(cookie => {
+  //   let parseCookie = cookie.split('=');
+  //   if (parseCookie[0] == 'IPAMerStatus') {
+  //     // replace all %20s in string with a space
+  //     parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
+  //     M.toast({html: `${parseCookie[1]}`});
+  //     // expire cookie
+  //     document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  //   }
+  // });
 
   // initialize address-assign IP field autocomplete
   var ipAuto = document.getElementById('customer-address');
@@ -57,6 +57,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const deleteCustomerCancel = document.getElementById('deleteCustomerCancel');
   deleteCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('delete-customer').style.display = 'none';
+  });
+
+  // add event listenter to edit customer button
+  document.getElementById('editCustomerBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('edit-customer').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to edit customer cancel button
+  const editCustomerCancel = document.getElementById('editCustomerCancel');
+  editCustomerCancel.addEventListener('click', function(e) {
+    document.getElementById('edit-customer').style.display = 'none';
   });
 
   // add event listenters to address action icons

@@ -11,18 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
-  // check for cookies
-  let theCookies = document.cookie.split(';');
-  theCookies.forEach(cookie => {
-    let parseCookie = cookie.split('=');
-    if (parseCookie[0] == 'iPAMxStatus') {
-      // replace all %20s in string with a space
-      parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
-      M.toast({html: `${parseCookie[1]}`});
-      // expire cookie
-      document.cookie = "iPAMxStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    }
-  });
+  // // check for cookies
+  // let theCookies = document.cookie.split(';');
+  // theCookies.forEach(cookie => {
+  //   let parseCookie = cookie.split('=');
+  //   if (parseCookie[0] == 'IPAMerStatus') {
+  //     // replace all %20s in string with a space
+  //     parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
+  //     M.toast({html: `${parseCookie[1]}`});
+  //     // expire cookie
+  //     document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  //   }
+  // });
 
   // add event listener to address-assign cancel button
   const assignCustomerCancel = document.getElementById('assignCustomerCancel');
@@ -34,6 +34,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const unassignCustomerCancel = document.getElementById('unassignCustomerCancel');
   unassignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-address').style.display = 'none';
+  });
+
+  // add event listenter to edit address button
+  document.getElementById('editAddressBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('edit-address').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to edit address cancel button
+  const editAddressCancel = document.getElementById('editAddressCancel');
+  editAddressCancel.addEventListener('click', function(e) {
+    document.getElementById('edit-address').style.display = 'none';
   });
 
   // add event listenter to delete address button

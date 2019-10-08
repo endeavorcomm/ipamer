@@ -15,12 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
   let theCookies = document.cookie.split(';');
   theCookies.forEach(cookie => {
     let parseCookie = cookie.split('=');
-    if (parseCookie[0] == 'iPAMxStatus') {
+    if (parseCookie[0] == 'IPAMerStatus') {
       // replace all %20s in string with a space
       parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
       M.toast({html: `${parseCookie[1]}`});
       // expire cookie
-      document.cookie = "iPAMxStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     }
   });
 
@@ -34,6 +34,21 @@ document.addEventListener('DOMContentLoaded', function() {
   const unassignCustomerCancel = document.getElementById('unassignCustomerCancel');
   unassignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-address').style.display = 'none';
+  });
+
+  // add event listenter to edit prefix button
+  document.getElementById('editPrefixBtn').addEventListener('click', function(e){
+
+    // show the popup box
+    document.getElementById('edit-prefix').style.display = 'block';
+
+    e.preventDefault();
+  });
+
+  // add event listener to edit prefix cancel button
+  const editPrefixCancel = document.getElementById('editPrefixCancel');
+  editPrefixCancel.addEventListener('click', function(e) {
+    document.getElementById('edit-prefix').style.display = 'none';
   });
 
   // add event listenter to delete prefix button
