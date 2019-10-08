@@ -81,8 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         // assign the database id, of the ip address, to this hidden input field's value
         document.getElementById('addressID').value = id;
-        // assign this text to the header of the popup box
-        //document.getElementById('assignIPHeader').textContent = `Assign Customer to IP`;
         // show the popup box
         document.getElementById('assign-address').style.display = 'block';
       }
@@ -106,7 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('unaddressID').value = id;
         document.getElementById('uncustomer').value = uncustomerName;
         document.getElementById('unaddressIP').value = unaddressIP;
-        //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
         document.getElementById('unassign-address').style.display = 'block';
       }
 
@@ -116,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of customer names when adding an IP address
   var xhrCustomer = new XMLHttpRequest();
-  xhrCustomer.open('GET', 'http://localhost/getCustomers', true);
+  xhrCustomer.open('GET', '/getCustomers', true);
   xhrCustomer.send();
   xhrCustomer.onreadystatechange = () => {
     if (xhrCustomer.readyState === 4) {

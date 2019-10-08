@@ -11,9 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addressSubnet == "") {
       addressSubnet.style.disabled = false;
     }
-    // if (addressSite == "") {
-    //   addressSite.style.disabled = false;
-    // }
   }
 
   document.getElementById('address-customer').addEventListener('change', () => {
@@ -32,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of prefix names when adding an IP address
   var xhrPrefixes = new XMLHttpRequest();
-  xhrPrefixes.open('GET', 'http://localhost/getPrefixes', true);
+  xhrPrefixes.open('GET', '/getPrefixes', true);
   xhrPrefixes.send();
   xhrPrefixes.onreadystatechange = () => {
     if (xhrPrefixes.readyState === 4) {
@@ -63,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of customer names when adding an IP address
   var xhrCustomer = new XMLHttpRequest();
-  xhrCustomer.open('GET', 'http://localhost/getCustomers', true);
+  xhrCustomer.open('GET', '/getCustomers', true);
   xhrCustomer.send();
   xhrCustomer.onreadystatechange = () => {
     if (xhrCustomer.readyState === 4) {
@@ -93,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of customer names when adding an IP address
   var xhrSite = new XMLHttpRequest();
-  xhrSite.open('GET', 'http://localhost/getSites', true);
+  xhrSite.open('GET', '/getSites', true);
   xhrSite.send();
   xhrSite.onreadystatechange = () => {
     if (xhrSite.readyState === 4) {
@@ -173,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
 
-        makeRequest('GET', `http://localhost/findPrefix?prefix=${prefix}`)
+        makeRequest('GET', `/findPrefix?prefix=${prefix}`)
           .then(responsePrefix => {
             if (responsePrefix !== "") {
               // prefix exists
@@ -194,14 +191,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // prefix subnet field is not empty in database, disable form Subnet field
                 addressSubnet.disabled = true;
               }
-          
-              // if (prefixSite == "") {
-              //   // prefix site field is empty in database, enable form Site field for assignment, if desired
-              //   addressSite.disabled = false;
-              // } else {
-              //   // prefix subnet field is not empty in database, disable form Site field
-              //   addressSite.disabled = true;
-              // }
       
               // show updated form field values
               M.updateTextFields();

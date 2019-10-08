@@ -11,19 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
-  // // check for cookies
-  // let theCookies = document.cookie.split(';');
-  // theCookies.forEach(cookie => {
-  //   let parseCookie = cookie.split('=');
-  //   if (parseCookie[0] == 'IPAMerStatus') {
-  //     // replace all %20s in string with a space
-  //     parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
-  //     M.toast({html: `${parseCookie[1]}`});
-  //     // expire cookie
-  //     document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  //   }
-  // });
-
   // add event listener to address-assign cancel button
   const assignCustomerCancel = document.getElementById('assignCustomerCancel');
   assignCustomerCancel.addEventListener('click', function(e) {
@@ -81,8 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         // assign the database id, of the ip address, to this hidden input field's value
         document.getElementById('addressID').value = id;
-        // assign this text to the header of the popup box
-        //document.getElementById('assignIPHeader').textContent = `Assign Customer to IP`;
         // show the popup box
         document.getElementById('assign-address').style.display = 'block';
       }
@@ -106,7 +91,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('unaddressID').value = id;
         document.getElementById('uncustomer').value = uncustomerName;
         document.getElementById('unaddressIP').value = unaddressIP;
-        //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
         document.getElementById('unassign-address').style.display = 'block';
       }
 
@@ -116,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of customer names when adding an IP address
   var xhrCustomer = new XMLHttpRequest();
-  xhrCustomer.open('GET', 'http://localhost/getCustomers', true);
+  xhrCustomer.open('GET', '/getCustomers', true);
   xhrCustomer.send();
   xhrCustomer.onreadystatechange = () => {
     if (xhrCustomer.readyState === 4) {

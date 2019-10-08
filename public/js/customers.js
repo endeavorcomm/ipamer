@@ -4,19 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
-  // // check for cookies
-  // let theCookies = document.cookie.split(';');
-  // theCookies.forEach(cookie => {
-  //   let parseCookie = cookie.split('=');
-  //   if (parseCookie[0] == 'IPAMerStatus') {
-  //     // replace all %20s in string with a space
-  //     parseCookie[1] = parseCookie[1].replace(/%20/g, ' ');
-  //     M.toast({html: `${parseCookie[1]}`});
-  //     // expire cookie
-  //     document.cookie = "IPAMerStatus=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-  //   }
-  // });
-
   // initialize address-assign IP field autocomplete
   var ipAuto = document.getElementById('customer-address');
   M.Autocomplete.init(ipAuto);
@@ -86,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('unaddressID').value = id;
       document.getElementById('unaddressIP').value = unIP;
       document.getElementById('uncustomer').value = uncustomerName;
-      //document.getElementById('unassignIPHeader').textContent = `Unassign Customer from IP`;
       document.getElementById('unassign-address').style.display = 'block';
 
       e.preventDefault();
@@ -95,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of IPs when assigning to a customer
   var xhrIP = new XMLHttpRequest();
-  xhrIP.open('GET', 'http://localhost/getAvailAddresses', true);
+  xhrIP.open('GET', '/getAvailAddresses', true);
   xhrIP.send();
   xhrIP.onreadystatechange = () => {
     if (xhrIP.readyState === 4) {

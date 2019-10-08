@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // create ajax request and get a list of site names when adding a prefix
   var xhrSites = new XMLHttpRequest();
-  xhrSites.open('GET', 'http://localhost/getSites', true);
+  xhrSites.open('GET', '/getSites', true);
   xhrSites.send();
   xhrSites.onreadystatechange = () => {
     if (xhrSites.readyState === 4) {
