@@ -27,15 +27,15 @@
       </table>
     </div>
     <div class="z-depth-5 popup-hidden" id="assign-prefix">
-      <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h3>
+      <h5 class="center" id="assignPrefixHeader">Assign Prefix to Site</h5>
       <br><br>
       <form class="container" action="/prefixes/assign" method="POST" class="col">
         <div class="row">
           <div class="input-field">
             <input type="text" name="prefix" id="site-prefix" data-length="50" class="autocomplete" autofocus required>
             <label for="site-prefix">Prefix</label>
-            <input type="hidden" name="site" id="site" value="">
           </div>
+          <input type="hidden" name="site" id="site" value="">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignPrefix" id="assignPrefix">Assign</button>
             <button class="btn" type="button" name="cancel" id="assignPrefixCancel">Cancel</button>
@@ -44,15 +44,13 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="unassign-prefix">
-      <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h3>
+      <h5 class="center" id="unassignPrefixHeader">Unassign Prefix from Site</h5>
       <br><br>
       <form class="container" action="/prefixes/unassign" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="unprefixID" id="unprefixID" value="">
-            <input type="hidden" name="unprefixName" id="unprefixName" value="">
-            <input type="hidden" name="unsite" id="unsite" value="{{site.name}}">
-          </div>
+          <input type="hidden" name="unprefixID" id="unprefixID" value="">
+          <input type="hidden" name="unprefixName" id="unprefixName" value="">
+          <input type="hidden" name="unsite" id="unsite" value="{{site.name}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignPrefix" id="unassignPrefix">Unassign</button>
             <button class="btn" type="button" name="uncancel" id="unassignPrefixCancel">Cancel</button>
@@ -61,16 +59,23 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="edit-site">
-      <h5 class="center" id="editSiteHeader">Edit Site</h3>
+      <h5 class="center" id="editSiteHeader">Edit Site</h5>
       <form class="container" action="/sites/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="siteName" id="siteName" placeholder="Name" value="{{site.name}}">
-            <input type="text" name="siteDescription" id="siteDescription" placeholder="Description" value="{{site.description}}">
-            <input type="text" name="siteAlias" id="siteAlias" placeholder="Alias" value="{{site.alias}}">
-            <input type="hidden" name="siteCurrent" id="siteCurrent" value="{{site.name}}">
-            <input type="hidden" name="siteID" id="siteID" value="{{site._id}}">
+            <input type="text" name="siteName" id="siteName" value="{{site.name}}">
+            <label for="siteName">Name</label>
           </div>
+          <div class="input-field">
+            <input type="text" name="siteDescription" id="siteDescription" value="{{site.description}}">
+            <label for="siteDescription">Description</label>
+          </div>
+          <div class="input-field">
+            <input type="text" name="siteAlias" id="siteAlias" value="{{site.alias}}">
+            <label for="siteAlias">Alias</label>
+          </div>
+          <input type="hidden" name="siteCurrent" id="siteCurrent" value="{{site.name}}">
+          <input type="hidden" name="siteID" id="siteID" value="{{site._id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="editSite" id="editSite">Submit</button>
             <button class="btn" type="button" name="cancel" id="editSiteCancel">Cancel</button>
@@ -79,14 +84,12 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="delete-site">
-      <h5 class="center" id="deleteSiteHeader">Confirm Delete</h3>
+      <h5 class="center" id="deleteSiteHeader">Confirm Delete</h5>
       <h6 class="center">Deleting this site will unassign all of its prefixes as well!</h6>
       <br><br>
       <form class="container" action="/sites/delete" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="siteName" id="siteName" value="{{site.name}}">
-          </div>
+          <input type="hidden" name="siteName" id="siteName" value="{{site.name}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="deleteSite" id="deleteSite">Delete</button>
             <button class="btn" type="button" name="cancel" id="deleteSiteCancel">Cancel</button>

@@ -26,17 +26,17 @@
       </table>
     </div>
     <div class="z-depth-5 popup-hidden" id="assign-address">
-      <h5 class="center" id="assignIPHeader">Assign Customer to IP</h3>
+      <h5 class="center" id="assignIPHeader">Assign Customer to IP</h5>
       <br><br>
       <form class="container" action="/addresses/assign" method="POST" class="col">
         <div class="row">
           <div class="input-field">
             <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
             <label for="address-customer">Customer</label>
-            <input type="hidden" name="addressID" id="addressID" value="">
-            <input type="hidden" name="addressIP" id="addressIP" value="">
-            <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
           </div>
+          <input type="hidden" name="addressID" id="addressID" value="">
+          <input type="hidden" name="addressIP" id="addressIP" value="">
+          <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
             <button class="btn" type="button" name="cancel" id="assignCustomerCancel">Cancel</button>
@@ -45,16 +45,14 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="unassign-address">
-      <h5 class="center" id="unassignIPHeader">Unassign Customer from IP</h3>
+      <h5 class="center" id="unassignIPHeader">Unassign Customer from IP</h5>
       <br><br>
       <form class="container" action="/addresses/unassign" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="unaddressID" id="unaddressID" value="">
-            <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
-            <input type="hidden" name="uncustomer" id="uncustomer" value="">
-            <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
-          </div>
+          <input type="hidden" name="unaddressID" id="unaddressID" value="">
+          <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
+          <input type="hidden" name="uncustomer" id="uncustomer" value="">
+          <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
             <button class="btn" type="button" name="uncancel" id="unassignCustomerCancel">Cancel</button>
@@ -63,17 +61,27 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="edit-prefix">
-      <h5 class="center" id="editPreifxHeader">Edit Site</h3>
+      <h5 class="center" id="editPreifxHeader">Edit Site</h5>
       <form class="container" action="/prefixes/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="prefixName" id="prefixName" placeholder="Name" value="{{name}}">
-            <input type="text" name="prefixSystem" id="prefixSystem" placeholder="System" value="{{system}}">
-            <input type="text" name="prefixDescription" id="prefixDescription" placeholder="Description" value="{{description}}">
-            <input type="text" name="prefixSubnet" id="prefixSubnet" placeholder="Subnet" value="{{subnet}}">
-            <input type="hidden" name="prefixID" id="prefixID" value="{{id}}">
-            <input type="hidden" name="prefixPrefix" id="prefixPrefix" value="{{prefix}}">
+            <input type="text" name="prefixName" id="prefixName" value="{{name}}">
+            <label for="prefixName">Name</label>
           </div>
+          <div class="input-field">
+            <input type="text" name="prefixSystem" id="prefixSystem" value="{{system}}">
+            <label for="prefixSystem">System</label>
+          </div>
+          <div class="input-field">
+            <input type="text" name="prefixDescription" id="prefixDescription" value="{{description}}">
+            <label for="prefixDescription">Description</label>
+          </div>
+          <div class="input-field">
+            <input type="text" name="prefixSubnet" id="prefixSubnet" value="{{subnet}}">
+            <label for="prefixSubnet">Subnet</label>
+          </div>
+          <input type="hidden" name="prefixID" id="prefixID" value="{{id}}">
+          <input type="hidden" name="prefixPrefix" id="prefixPrefix" value="{{prefix}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="editPrefix" id="editPrefix">Submit</button>
             <button class="btn" type="button" name="cancel" id="editPrefixCancel">Cancel</button>
@@ -82,14 +90,12 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="delete-prefix">
-      <h5 class="center" id="deletePrefixHeader">Confirm Delete</h3>
+      <h5 class="center" id="deletePrefixHeader">Confirm Delete</h5>
       <h6 class="center">Deleting this prefix will delete all of its IPs as well!</h6>
       <br><br>
       <form class="container" action="/prefixes/delete" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="prefixName" id="prefixName" value="{{name}}">
-          </div>
+          <input type="hidden" name="prefixName" id="prefixName" value="{{name}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="deletePrefix" id="deletePrefix">Delete</button>
             <button class="btn" type="button" name="cancel" id="deletePrefixCancel">Cancel</button>

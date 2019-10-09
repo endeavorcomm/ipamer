@@ -24,15 +24,15 @@
       </table>
     </div>
     <div class="z-depth-5 popup-hidden" id="assign-address">
-      <h5 class="center" id="assignIPHeader">Assign IP to Customer</h3>
+      <h5 class="center" id="assignIPHeader">Assign IP to Customer</h5>
       <br><br>
       <form class="container" action="/addresses/assign" method="POST" class="col">
         <div class="row">
           <div class="input-field">
             <input type="text" name="address" id="customer-address" data-length="20" class="autocomplete" autofocus required>
             <label for="customer-address">IP Address</label>
-            <input type="hidden" name="customer" id="customer" value="">
           </div>
+          <input type="hidden" name="customer" id="customer" value="">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignIP" id="assignIP">Assign</button>
             <button class="btn" type="button" name="cancel" id="assignIPCancel">Cancel</button>
@@ -41,15 +41,13 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="unassign-address">
-      <h5 class="center" id="unassignIPHeader">Unassign IP from Customer</h3>
+      <h5 class="center" id="unassignIPHeader">Unassign IP from Customer</h5>
       <br><br>
       <form class="container" action="/addresses/unassign" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="unaddressID" id="unaddressID" value="">
-            <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
-            <input type="hidden" name="uncustomer" id="uncustomer" value="">
-          </div>
+          <input type="hidden" name="unaddressID" id="unaddressID" value="">
+          <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
+          <input type="hidden" name="uncustomer" id="uncustomer" value="">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
             <button class="btn" type="button" name="uncancel" id="unassignCustomerCancel">Cancel</button>
@@ -58,14 +56,18 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="edit-customer">
-      <h5 class="center" id="editCustomerHeader">Edit Customer</h3>
+      <h5 class="center" id="editCustomerHeader">Edit Customer</h5>
       <form class="container" action="/customers/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="customerName" id="customerName" placeholder="Name" value="{{customer.name}}">
-            <input type="text" name="customerDescription" id="customerDescription" placeholder="Description" value="{{customer.description}}">
-            <input type="hidden" name="customerID" id="customerID" value="{{customer._id}}">
+            <input type="text" name="customerName" id="customerName" value="{{customer.name}}">
+            <label for="customerName">Name</label>
           </div>
+          <div class="input-field">
+            <input type="text" name="customerDescription" id="customerDescription" value="{{customer.description}}">
+            <label for="customerDescription">Description</label>
+          </div>
+          <input type="hidden" name="customerID" id="customerID" value="{{customer._id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="editCustomer" id="editCustomer">Submit</button>
             <button class="btn" type="button" name="cancel" id="editCustomerCancel">Cancel</button>
@@ -74,14 +76,12 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="delete-customer">
-      <h5 class="center" id="deleteCustomerHeader">Confirm Delete</h3>
+      <h5 class="center" id="deleteCustomerHeader">Confirm Delete</h5>
       <h6 class="center">Are you sure you want to delete this customer?</h6>
       <br><br>
       <form class="container" action="/customers/delete" method="POST" class="col">
         <div class="row">
-          <div class="input-field">
-            <input type="hidden" name="customerName" id="customerName" value="{{customer.name}}">
-          </div>
+          <input type="hidden" name="customerName" id="customerName" value="{{customer.name}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="deleteCustomer" id="deleteCustomer">Delete</button>
             <button class="btn" type="button" name="cancel" id="deleteCustomerCancel">Cancel</button>
