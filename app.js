@@ -16,7 +16,7 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // connect to mongoose
-mongoose.connect('mongodb://localhost/isp', {
+mongoose.connect('mongodb://localhost/ipamer', {
   useNewUrlParser: true
 })
 .then(() => {
@@ -25,7 +25,7 @@ mongoose.connect('mongodb://localhost/isp', {
 .catch(err => console.log(err));
 
 const store = new MongoDBStore({
-  uri: 'mongodb://localhost/isp',
+  uri: 'mongodb://localhost/ipamer',
   collection: 'sessions'
 });
 
@@ -62,7 +62,7 @@ app.use(bodyParser.json());
 
 // Express-Session Middleware
 app.use(session({
-  secret: 'k9vmg',
+  secret: 'secret',
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
   },

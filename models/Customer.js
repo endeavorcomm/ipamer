@@ -38,8 +38,9 @@ module.exports.getCustomers = (callback, limit) => {
 }
 
 // get customer
-module.exports.getCustomerById = (id, callback) => {
-  Customer.findById(id, callback);
+module.exports.getCustomerByName = (name, callback) => {
+  let query = {name: name};
+  Customer.find(query, callback);
 }
 
 // add customer
