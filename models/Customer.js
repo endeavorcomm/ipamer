@@ -35,10 +35,10 @@ let Customer = module.exports = mongoose.model('customers', CustomerSchema);
 // get customers
 module.exports.getCustomers = (callback, limit) => {
   Customer.find(callback).limit(limit);
-}
+};
 
 // get customer
 module.exports.getCustomerByName = (name, callback) => {
   let query = {name: name};
   Customer.find(query, callback);
-}
+};

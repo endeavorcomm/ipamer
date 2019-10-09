@@ -99,5 +99,5 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Error with ajax request');
       }
     }
-  }
+  };
 });

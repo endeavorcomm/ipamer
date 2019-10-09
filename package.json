@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "Easily Track and Assign IP Addresses",
   "main": "app.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node app.js",
+    "lint": "jshint ./"
+  },
   "author": "Jason Creviston",
   "license": "MIT",
   "dependencies": {
@@ -16,5 +19,9 @@
     "express-session": "1.16.1",
     "ip": "1.1.5",
     "mongoose": "5.5.4"
+  },
+  "devDependencies": {
+    "gulp": "4.0.2",
+    "jshint": "2.10.2"
   }
 }

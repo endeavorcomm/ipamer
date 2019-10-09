@@ -20,7 +20,7 @@ mongoose.connect('mongodb://localhost/ipamer', {
 .then(() => {
   console.log('Mongo DB Connected!');
 })
-.catch(err => console.log(err));
+.catch(err => console.log('Mongo DB Connection Error: ', err));
 
 const store = new MongoDBStore({
   uri: 'mongodb://localhost/ipamer',
@@ -169,5 +169,5 @@ app.use('/prefixes', prefixes);
 app.use('/sites', sites);
 
 server.listen(80, () => {
-  console.log('Server Listening on Port 80...')
+  console.log('Server Listening on Port 80...');
 });

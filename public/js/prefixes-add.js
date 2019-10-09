@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Error with ajax request');
       }
     }
-  }
+  };
 
   // client-side message setup when adding a prefix
   const info_msg = document.getElementById('info_msg');
@@ -53,5 +53,5 @@ document.addEventListener('DOMContentLoaded', function() {
       info_msg.innerHTML = 'Creating ...';
       info_msg.style.display = 'block';
     }
-  })
+  });
 });

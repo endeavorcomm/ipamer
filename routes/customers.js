@@ -21,7 +21,7 @@ router.get('/status', (req, res) => {
         customer: customers
       });
     });
-})
+});
 
 // customer detail route
 router.get('/customer/:_id', (req, res) => {

@@ -18,7 +18,7 @@ router.get('/status', (req, res) => {
         site: sites
       });
     });
-})
+});
 
 // site detail route
 router.get('/site/:_id', (req, res) => {

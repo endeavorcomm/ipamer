@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Error with ajax request');
       }
     }
-  }
+  };
 
   // initialize address-add customer field autocomplete
   var customerAuto = document.getElementById('address-customer');
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Error with ajax request');
       }
     }
-  }
+  };
 
   // initialize address-add site field autocomplete
   var siteAuto = document.getElementById('address-site');
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Error with ajax request');
       }
     }
-  }
+  };
 
   document.getElementById('address-prefix').addEventListener('change', () => {
     // when Prefix/CIDR field is changed, fill in Subnet, Gateway and Site if available
@@ -164,11 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
               } else {
                 return;
               }
-            }
+            };
             xhr.open(method || 'GET', url, true);
             xhr.send();
           });
-        }
+        };
 
         makeRequest('GET', `/findPrefix?prefix=${prefix}`)
           .then(responsePrefix => {

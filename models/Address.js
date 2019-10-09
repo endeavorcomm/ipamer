@@ -57,4 +57,4 @@ let Address = module.exports = mongoose.model('addresses', AddressSchema);
 // get addresses
 module.exports.getAddresses = (callback, limit) => {
   Address.find(callback).limit(limit);
-}
+};

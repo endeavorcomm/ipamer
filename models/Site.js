@@ -39,4 +39,4 @@ let Site = module.exports = mongoose.model('sites', SiteSchema);
 // get sites
 module.exports.getSites = (callback, limit) => {
   Site.find(callback).limit(limit);
-}
+};

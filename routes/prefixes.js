@@ -743,7 +743,7 @@ router.post('/add', (req, res) => {
                   if (maskOctet !== '255') {
                     maskArray.push(maskOctet);
                   }
-                })
+                });
 
                 // get network address from prefix
                 let initPrefix = req.body.prefix;
@@ -1230,7 +1230,7 @@ router.post('/add', (req, res) => {
                   if (maskOctet !== '255') {
                     maskArray.push(maskOctet);
                   }
-                })
+                });
 
                 // get network and broadcast address from prefix
                 const subnetInfo = ip.cidrSubnet(req.body.prefix);

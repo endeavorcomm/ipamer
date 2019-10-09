@@ -1,0 +1,6 @@
+{
+  "esnext":"true",
+  "noyield":"true",
+  "undef": "true",
+  "unused": "true"
+}
