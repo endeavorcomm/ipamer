@@ -168,6 +168,6 @@ app.use('/customers', customers);
 app.use('/prefixes', prefixes);
 app.use('/sites', sites);
 
-server.listen(80, () => {
-  console.log('Server Listening on Port 80...');
+server.listen(8080, () => {
+  console.log('Server Listening on Port 8080...');
 });

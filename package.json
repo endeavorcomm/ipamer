@@ -4,8 +4,7 @@
   "description": "Easily Track and Assign IP Addresses",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "lint": "jshint ./"
+    "start": "node app.js"
   },
   "author": "Jason Creviston",
   "license": "MIT",
