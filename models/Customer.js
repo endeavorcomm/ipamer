@@ -42,20 +42,3 @@ module.exports.getCustomerByName = (name, callback) => {
   let query = {name: name};
   Customer.find(query, callback);
 }
-
-// add customer
-module.exports.addCustomer = (customer, callback) => {
-  Customer.create(customer, callback);
-}
-
-// update customer
-module.exports.updateCustomer = (id, update, options, callback) => {
-  let query = {_id: id};
-  Customer.findOneAndUpdate(query, update, options, callback);
-}
-
-// remove customer
-module.exports.deleteCustomer = (id, callback) => {
-  let query = {_id: id};
-  Customer.deleteOne(query, callback);
-}
