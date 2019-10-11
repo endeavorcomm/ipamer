@@ -3,7 +3,7 @@
     <a class="btn blue lighten-2" id="editAddressBtn">Edit Address</a>
     <a class="btn red lighten-2" id="deleteAddressBtn">Delete Address</a>
   </div>
-  <h3>{{address.ip}}</h3>{{#if address.description}}<h6>Description - {{address.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}<h6>Subnet - {{address.subnet}}</h6><h6>Gateway - {{address.gateway}}</h6><h6>Prefix - {{address.prefix}}</h6>
+  <h3 id="ip-{{address._id}}">{{address.ip}}</h3>{{#if address.description}}<h6>Description - {{address.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}<h6>Subnet - {{address.subnet}}</h6><h6>Gateway - {{address.gateway}}</h6><h6>Prefix - {{address.prefix}}</h6>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -45,6 +45,7 @@
       <form class="container" action="/addresses/unassign" method="POST" class="col">
         <div class="row">
           <input type="hidden" name="unaddressID" id="unaddressID" value="">
+          <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
           <input type="hidden" name="uncustomer" id="uncustomer" value="">
           <input type="hidden" name="unprefixID" id="unprefixID" value="{{this.id}}">
           <div class="center-align mb-5">
