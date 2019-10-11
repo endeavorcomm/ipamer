@@ -103,7 +103,13 @@ router.post('/edit', (req, res) => {
   const reqURL = reqHeader[1];
 
   Customer.updateOne({_id: customerID}, {name: customerName, description: customerDesc})
-    .then(ok => {res.redirect(reqURL);});
+    .then(ok => {
+      // update any IPs that are assigned to the customer
+      Address.updateMany({'customer.id': customerID}, {'customer.name': customerName})
+        .then(updated => {
+          res.redirect(reqURL);
+        });
+    });
 });
 
 // process customer delete form
