@@ -84,7 +84,7 @@ app.use(function(req, res, next) {
 });
 
 app.get('/', (req, res) => {
-  res.render('index');
+  res.render('index.handlebars');
 });
 
 app.post('/search', (req, res) => {
