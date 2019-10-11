@@ -1,6 +1,6 @@
 {
   "name": "ipamer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Easily Track and Assign IP Addresses",
   "main": "app.js",
   "scripts": {
