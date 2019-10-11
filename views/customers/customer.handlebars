@@ -11,13 +11,14 @@
         <thead class="grey lighten-3">
           <tr>
             <th>IP Address</th>
+            <th>Description</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {{#each customer.addresses}}
+          {{#each address}}
           <tr>
-            <td><a href="/addresses/address/{{this.id}}" id="ip-{{this.id}}">{{this.ip}}</a></td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
+            <td><a href="/addresses/address/{{this.id}}" id="ip-{{this.id}}">{{this.ip}}</a></td><td>{{this.description}}</td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
           </tr>
           {{/each}}
         </tbody>

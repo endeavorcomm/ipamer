@@ -36,10 +36,15 @@ router.get('/customer/:_id', (req, res) => {
 
   Customer.findOne({_id: _id}, {})
     .then(customer => {
-      customer.addresses.sort(compare);
-      res.render('customers/customer', {
-        customer: customer
-      });
+      Address.find({'customer.name': customer.name}, {})
+        .then(addresses => {
+          addresses.sort(compare);
+
+          res.render('customers/customer', {
+            customer: customer,
+            address: addresses
+          });
+        });
     });
 });
 
