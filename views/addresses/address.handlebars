@@ -30,12 +30,12 @@
             <input type="text" name="customer" id="address-customer" data-length="50" class="autocomplete" autofocus required>
             <label for="address-customer">Customer</label>
           </div>
-          <input type="hidden" name="addressID" id="addressID" value="">
-          <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="assignCustomer" id="assignCustomer">Assign</button>
             <button class="btn" type="button" name="cancel" id="assignCustomerCancel">Cancel</button>
           </div>
+          <input type="hidden" name="addressID" id="addressID" value="">
+          <input type="hidden" name="prefixID" id="prefixID" value="{{this.id}}">
         </div>
       </form>
     </div>
@@ -56,11 +56,11 @@
       </form>
     </div>
     <div class="z-depth-5 popup-hidden" id="edit-address">
-      <h5 class="center" id="editAddressHeader">Edit Site</h5>
+      <h5 class="center" id="editAddressHeader">Edit Address</h5>
       <form class="container" action="/addresses/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="addressDescription" id="addressDescription" value="{{address.description}}">
+            <input type="text" name="addressDescription" id="addressDescription" value="{{address.description}}" autofocus>
             <label for="addressDescription">Description</label>
           </div>
           <input type="hidden" name="addressID" id="addressID" value="{{address.id}}">
