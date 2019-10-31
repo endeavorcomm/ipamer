@@ -229,7 +229,7 @@ router.post('/delete', (req, res) => {
   Prefix.findOne({name: prefixName}, {})
     .then(prefixFound => {
       const prefix = prefixFound.prefix;
-
+      console.log(prefix);
       // remove prefix
       Prefix.deleteOne({prefix: prefix}, (err) => {
         if (err) {
