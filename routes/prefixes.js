@@ -226,7 +226,7 @@ router.post('/delete', (req, res) => {
   const reqURL = `http://${reqHost}/prefixes/status`;
   
   // get prefix from prefix name
-  Prefix.findOne({name: prefixName}, {})
+  Prefix.findOne({prefix: prefixName}, {})
     .then(prefixFound => {
       const prefix = prefixFound.prefix;
       // remove prefix
