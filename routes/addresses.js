@@ -123,7 +123,7 @@ router.post('/assign', (req, res) => {
                 // customer updated with IP address!
                 // set cookie for toast
                 res.cookie('IPAMerStatus', 'Address Assigned');
-                res.redirect(reqURL);
+                res.redirect(`addresses/address/${ipFound._id.toString()}`);
               }
             });
           });
