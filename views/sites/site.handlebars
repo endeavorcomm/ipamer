@@ -2,7 +2,8 @@
   <div class="right">
     <a class="btn green lighten-2" id="assignPrefixBtn">Assign Prefix</a>
     <a class="btn blue lighten-2" id="editSiteBtn">Edit Site</a>
-    {{#if loggedIn}}<a class="btn red lighten-2" id="deleteSiteBtn">Delete Site</a>{{/if}}
+    {{#if loggedIn}}<a class="btn red lighten-2" id="deleteSiteBtn">Delete Site</a>
+    {{else}}<a id="deleteSiteBtn"></a>{{/if}}
   </div>
   <h3 class="siteName">{{site.name}}</h3>{{#if site.description}}<h6>Description - {{site.description}}</h6>{{else}}<h6>Description - </h6>{{/if}}{{#if site.alias}}<h6>Alias - {{site.alias}}</h6>{{else}}<h6>Alias - </h6>{{/if}}
   <div class="row mt-4">
