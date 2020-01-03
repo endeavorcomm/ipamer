@@ -65,7 +65,7 @@
       <form class="container" action="/prefixes/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="prefixName" id="prefixName" value="{{name}}">
+            <input type="text" name="editPrefixName" id="editPrefixName" value="{{name}}">
             <label for="prefixName">Name</label>
           </div>
           <div class="input-field">
@@ -80,7 +80,7 @@
             <input type="text" name="prefixSubnet" id="prefixSubnet" value="{{subnet}}">
             <label for="prefixSubnet">Subnet</label>
           </div>
-          <input type="hidden" name="prefixID" id="prefixID" value="{{id}}">
+          <input type="hidden" name="editPrefixID" id="editPrefixID" value="{{id}}">
           <input type="hidden" name="prefixPrefix" id="prefixPrefix" value="{{prefix}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="editPrefix" id="editPrefix">Submit</button>

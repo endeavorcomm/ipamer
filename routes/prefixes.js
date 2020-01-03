@@ -124,8 +124,8 @@ router.post('/unassign', (req, res) => {
 
 // process prefix edit form
 router.post('/edit', (req, res) => {
-  const prefixID = req.body.prefixID;
-  const prefixName = req.body.prefixName;
+  const prefixID = req.body.editPrefixID;
+  const prefixName = req.body.editPrefixName;
   const prefixSystem = req.body.prefixSystem;
   const prefixDesc = req.body.prefixDescription;
   const prefixSubnet = req.body.prefixSubnet;
