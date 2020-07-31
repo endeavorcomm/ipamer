@@ -24,4 +24,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // add event listener to pagination buttons
+  const paginationEls = document.querySelectorAll('.pagination');
+  paginationEls.forEach( element => {
+    element.addEventListener('click', function(e) {
+      const from = window.location.href
+      const referrer = from.split('/')
+      e.preventDefault()
+      let url = e.target.id;
+      if (url === '') {
+        url = e.target.parentElement.id;
+      }
+      const params = url.split('/')
+      window.location.href = `http://localhost:8080/${referrer[3]}/status/${params[6]}`
+    });
+  })
 });

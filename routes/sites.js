@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fetch = require('node-fetch')
 
 // load site model
 Site = require('../models/Site');
@@ -12,12 +13,16 @@ router.get('/add', (req, res) => {
 // site status route
 router.get('/status', (req, res) => {
   // query sites
-  Site.find({}, {}).sort({name: 1})
-    .then(sites => {
-      res.render('sites/status', {
-        site: sites
-      });
-    });
+  (async () => {
+    const response = await fetch('https://netbox.weendeavor.com/api/dcim/sites', {
+      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    })
+    
+    const sites = await response.json()
+    res.render('sites/status', {
+      site: sites.results
+    })
+  })();
 });
 
 // site detail route

@@ -6,15 +6,13 @@
         <thead class="grey lighten-3">
           <tr>
             <th>Name</th>
-            <th>Alias</th>
             <th>Description</th>
-            <th>Prefixes</th>
           </tr>
         </thead>
         <tbody>
           {{#each site}}
           <tr>
-            <td><a href="/sites/site/{{this._id}}">{{this.name}}</a></td><td>{{this.alias}}</td><td>{{this.description}}</td><td>{{#each this.prefixes}}<a href="/prefixes/prefix/{{this.id}}">{{this.prefix}}</a><br>{{/each}}</td>
+            <td><a href="/sites/site/{{this.id}}">{{this.name}}</a></td><td>{{this.description}}</td>
           </tr>
           {{/each}}
         </tbody>

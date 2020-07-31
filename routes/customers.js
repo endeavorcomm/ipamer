@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const fetch = require('node-fetch')
 
 // load customer model
 Customer = require('../models/Customer');
@@ -15,37 +16,47 @@ router.get('/add', (req, res) => {
 // customer status route
 router.get('/status', (req, res) => {
   // query customers
-  Customer.find({name: {$ne:'Reserved'}}, {}).sort({name: 1})
-    .then(customers => {
-      res.render('customers/status', {
-        customer: customers
-      });
-    });
+  (async () => {
+    let url
+    const limit = req.query.limit ? req.query.limit : false
+    const offset = req.query.offset ? req.query.offset : false
+    if (limit && offset) {
+      url = `https://netbox.weendeavor.com/api/tenancy/tenants?limit=${limit}&offset=${offset}`
+    } else {
+      url = 'https://netbox.weendeavor.com/api/tenancy/tenants'
+    }
+    const response = await fetch(url, {
+      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    })
+    
+    const tenants = await response.json()
+    res.render('customers/status', {
+      customer: tenants
+    })
+  })();
 });
 
 // customer detail route
-router.get('/customer/:_id', (req, res) => {
-  const _id = req.params._id;
-
-  // sort ip addresses by number, not string
-  function compare(a,b) {
-    const ipA = a.ip;
-    const ipB = b.ip;
-    return ipA.localeCompare(ipB, 'en', {numeric: true});
-  }
-
-  Customer.findOne({_id: _id}, {})
-    .then(customer => {
-      Address.find({'customer.name': customer.name}, {})
-        .then(addresses => {
-          addresses.sort(compare);
-
-          res.render('customers/customer', {
-            customer: customer,
-            address: addresses
-          });
-        });
-    });
+router.get('/customer/:id', (req, res) => {
+  (async () => {
+    let url
+    const id = req.params.id;
+    const limit = req.query.limit ? req.query.limit : false
+    const offset = req.query.offset ? req.query.offset : false
+    if (limit && offset) {
+      url = `https://netbox.weendeavor.com/api/ipam/ip-addresses/?tenant_id=${id}&limit=${limit}&offset=${offset}`
+    } else {
+      url = `https://netbox.weendeavor.com/api/ipam/ip-addresses/?tenant_id=${id}`
+    }
+    const response = await fetch(url, {
+      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    })
+    
+    const addresses = await response.json()
+    res.render('customers/customer', {
+      address: addresses
+    })
+  })();
 });
 
 // process address creation form

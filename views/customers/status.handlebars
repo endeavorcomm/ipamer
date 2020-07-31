@@ -1,5 +1,17 @@
 <div class="container">
   <h4>Customers</h4>
+  <div class="right mb-3">
+    {{#if customer.previous}}
+      <a href="" class="btn pagination" id="{{customer.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if customer.next}}
+      <a href="" class="btn pagination" id="{{customer.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
+  </div>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table>
@@ -7,17 +19,30 @@
           <tr>
             <th>Name</th>
             <th>Description</th>
+            <th># of IPs</th>
+            <th># of Prefixes</th>
           </tr>
         </thead>
         <tbody>
-          {{#each customer}}
+          {{#each customer.results}}
           <tr>
-            <td><a href="/customers/customer/{{this._id}}">{{this.name}}</a></td><td>{{this.description}}</td>
+            <td><a href="/customers/customer/{{this.id}}">{{this.name}}</a></td><td>{{this.description}}</td><td>{{this.ipaddress_count}}</td><td>{{this.prefix_count}}</td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
   </div>
+  <div class="right mb-3">
+    {{#if customer.previous}}
+      <a href="" class="btn pagination" id="{{customer.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if customer.next}}
+      <a href="" class="btn pagination" id="{{customer.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
+  </div>
 </div>
-<script src="/js/cookies.js"></script>

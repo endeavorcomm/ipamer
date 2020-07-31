@@ -1,28 +1,49 @@
 <div class="container">
   <h4>Prefixes</h4>
+  <div class="right mb-3">
+    {{#if prefix.previous}}
+      <a href="" class="btn pagination" id="{{prefix.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if prefix.next}}
+      <a href="" class="btn pagination" id="{{prefix.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
+  </div>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table>
         <thead class="grey lighten-3">
           <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>System</th>
-            <th>Description</th>
+            <th class="pl-3">Site</th>
             <th>Prefix</th>
-            <th>Site</th>
-            <th>Gateway</th>
-            <th>Subnet</th>
+            <th>VRF</th>
+            <th>VLAN</th>
+            <th>Description</th>
           </tr>
         </thead>
         <tbody>
-          {{#each prefix}}
+          {{#each prefix.results}}
           <tr>
-            <td><a href="/prefixes/prefix/{{this._id}}">{{this.name}}</a></td><td>{{this.type}}</td><td>{{this.system}}</td><td>{{this.description}}</td><td id="{{this.prefix}}">{{this.prefix}}</td><td>{{this.site}}</td><td>{{this.gateway}}</td><td>{{this.subnet}}</td>
+            <td class="pl-3">{{this.site.name}}</td><td id="{{this.prefix}}"><a href="/prefixes/prefix/{{this.id}}">{{this.prefix}}</a></td><td>{{this.vrf.name}}</td><td>{{this.vlan.name}}</td><td>{{this.description}}</td>
           </tr>
           {{/each}}
         </tbody>
       </table>
     </div>
+  </div>
+  <div class="right mb-3">
+    {{#if prefix.previous}}
+      <a href="" class="btn pagination" id="{{prefix.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if prefix.next}}
+      <a href="" class="btn pagination" id="{{prefix.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
   </div>
 </div>

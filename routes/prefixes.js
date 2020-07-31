@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ip = require('ip');
+const fetch = require('node-fetch')
 
 // load prefix model
 Prefix = require('../models/Prefix');
@@ -19,12 +20,24 @@ router.get('/add', (req, res) => {
 // prefix status route
 router.get('/status', (req, res) => {
   // query prefixes
-  Prefix.find({}, {}).sort({name: 1})
-    .then(prefixes => {
-      res.render('prefixes/status', {
-        prefix: prefixes
-      });
-    });
+  (async () => {
+    let url
+    const limit = req.query.limit ? req.query.limit : false
+    const offset = req.query.offset ? req.query.offset : false
+    if (limit && offset) {
+      url = `https://netbox.weendeavor.com/api/ipam/prefixes?limit=${limit}&offset=${offset}`
+    } else {
+      url = 'https://netbox.weendeavor.com/api/ipam/prefixes'
+    }
+    const response = await fetch(url, {
+      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    })
+    
+    const prefixes = await response.json()
+    res.render('prefixes/status', {
+      prefix: prefixes
+    })
+  })();
 });
 
 // prefix detail route

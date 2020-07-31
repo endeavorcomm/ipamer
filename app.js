@@ -1,4 +1,5 @@
 const express = require('express');
+require('dotenv').config();
 const exphbs = require('express-handlebars');
 const app = express();
 const path = require('path');
@@ -9,6 +10,7 @@ const flash = require('connect-flash');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const MongoDBStore = require('connect-mongodb-session')(session);
+
 
 // link to static public files
 app.use(express.static(path.join(__dirname, 'public')));
