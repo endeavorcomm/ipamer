@@ -8,9 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var mobileNav = document.querySelectorAll('.sidenav');
   M.Sidenav.init(mobileNav);
 
-  // give search field focus on page load
-  document.getElementById('search').focus();
-
   // check for cookies
   let theCookies = document.cookie.split(';');
   theCookies.forEach(cookie => {
@@ -28,15 +25,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const paginationEls = document.querySelectorAll('.pagination');
   paginationEls.forEach( element => {
     element.addEventListener('click', function(e) {
-      const from = window.location.href
-      const referrer = from.split('/')
       e.preventDefault()
+      const from = window.location.href
+      const referrer = from.split('?')
       let url = e.target.id;
       if (url === '') {
         url = e.target.parentElement.id;
       }
-      const params = url.split('/')
-      window.location.href = `http://localhost:8080/${referrer[3]}/status/${params[6]}`
+      const params = url.split('?')
+      window.location.href = `${referrer[0]}?${params[1]}`
     });
   })
 });

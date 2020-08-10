@@ -1,10 +1,23 @@
 <div class="container">
   <div class="right">
-    <a class="btn green lighten-2" id="assignCustomerBtn">Assign Address</a>
+    <a href="/addresses/assign/?name={{customer.name}}" class="btn green lighten-2" id="assignCustomerBtn">Assign Address</a>
     <a class="btn blue lighten-2" id="editCustomerBtn">Edit Customer</a>
     <a class="btn red lighten-2" id="deleteCustomerBtn">Delete Customer</a>
   </div>
-  <h3 class="customerName">{{address.results.[0].tenant.name}}</h3>
+  <h3>{{customer.name}}</h3>
+  {{#if customer.description}}<h6>Description - {{customer.description}}</h6>{{/if}}
+  <div class="right mb-3">
+    {{#if addresses.previous}}
+      <a href="" class="btn pagination" id="{{addresses.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if addresses.next}}
+      <a href="" class="btn pagination" id="{{addresses.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
+  </div>
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
@@ -16,7 +29,7 @@
           </tr>
         </thead>
         <tbody>
-          {{#each address.results}}
+          {{#each addresses.results}}
           <tr>
             <td><a href="/addresses/address/{{this.id}}" id="ip-{{this.id}}">{{this.address}}</a></td><td>{{this.description}}</td><td><a href="#" alt="Unassign IP"><i class="unassignIP edit-item fas fa-trash tooltipped" data-tooltip="Unassign IP" id="{{this.id}}"></i></a></td>
           </tr>
@@ -24,34 +37,15 @@
         </tbody>
       </table>
     </div>
-    <div class="z-depth-5 popup-hidden" id="assign-address">
-      <h5 class="center" id="assignIPHeader">Assign IP to Customer</h5>
-      <br><br>
-      <form class="container" action="/addresses/assign" method="POST" class="col">
-        <div class="row">
-          <div class="input-field">
-            <input type="text" name="address" id="customer-address" data-length="20" class="autocomplete" autofocus required>
-            <label for="customer-address">IP Address</label>
-          </div>
-          <input type="hidden" name="customer" id="customer" value="">
-          <div class="center-align mb-5">
-            <button class="btn" type="submit" name="assignIP" id="assignIP">Assign</button>
-            <button class="btn" type="button" name="cancel" id="assignIPCancel">Cancel</button>
-          </div>
-        </div>
-      </form>
-    </div>
     <div class="z-depth-5 popup-hidden" id="unassign-address">
-      <h5 class="center" id="unassignIPHeader">Unassign IP from Customer</h5>
+      <h5 class="center" id="unassignIPHeader">Unassign IP from Customer?</h5>
       <br><br>
-      <form class="container" action="/addresses/unassign" method="POST" class="col">
+      <form class="container" action="/addresses" method="POST" class="col">
         <div class="row">
           <input type="hidden" name="unaddressID" id="unaddressID" value="">
-          <input type="hidden" name="unaddressIP" id="unaddressIP" value="">
-          <input type="hidden" name="uncustomer" id="uncustomer" value="">
           <div class="center-align mb-5">
-            <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
             <button class="btn" type="button" name="uncancel" id="unassignCustomerCancel">Cancel</button>
+            <button class="btn" type="submit" name="unassignCustomer" id="unassignCustomer">Unassign</button>
           </div>
         </div>
       </form>
@@ -68,7 +62,7 @@
             <input type="text" name="customerDescription" id="customerDescription" value="{{customer.description}}">
             <label for="customerDescription">Description</label>
           </div>
-          <input type="hidden" name="customerID" id="customerID" value="{{customer._id}}">
+          <input type="hidden" name="customerID" id="customerID" value="{{customer.id}}">
           <div class="center-align mb-5">
             <button class="btn" type="submit" name="editCustomer" id="editCustomer">Submit</button>
             <button class="btn" type="button" name="cancel" id="editCustomerCancel">Cancel</button>
@@ -82,14 +76,26 @@
       <br><br>
       <form class="container" action="/customers/delete" method="POST" class="col">
         <div class="row">
-          <input type="hidden" name="customerName" id="customerName" value="{{customer.name}}">
+          <input type="hidden" name="customerId" id="customerId" value="{{customer.id}}">
           <div class="center-align mb-5">
-            <button class="btn" type="submit" name="deleteCustomer" id="deleteCustomer">Delete</button>
             <button class="btn" type="button" name="cancel" id="deleteCustomerCancel">Cancel</button>
+            <button class="btn" type="submit" name="deleteCustomer" id="deleteCustomer">Delete</button>
           </div>
         </div>
       </form>
     </div>
+  </div>
+  <div class="right mb-3">
+    {{#if addresses.previous}}
+      <a href="" class="btn pagination" id="{{addresses.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if addresses.next}}
+      <a href="" class="btn pagination" id="{{addresses.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
   </div>
 </div>
 <script src="/js/customers.js"></script>

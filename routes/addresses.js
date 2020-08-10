@@ -1,678 +1,293 @@
 const express = require('express');
 const router = express.Router();
 const ip = require('ip');
+const fetch = require('node-fetch');
 
-// load prefix model
-Prefix = require('../models/Prefix');
+// add address route
+router.get('/assign', (req, res) => {
+  (async () => {
+    const siteResponse = await fetch(`https://netbox.weendeavor.com/api/dcim/sites/`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    })
 
-// load site model
-Site = require('../models/Site');
+    const siteJson = await siteResponse.json()
 
-// load address model
-Address = require('../models/Address');
+    // manipulate object data into usable format for autocomplete
+    let sites = [];
+    for (var i=0; i<siteJson.count; i++) {
+      sites.push(siteJson.results[i].name)
+    }
 
-// load customer model
-Customer = require('../models/Customer');
+    let selectedCustomer
+    if (req.query.name) {
+      // customer name was included in url, prepopulate customer value of form with this data
+      selectedCustomer = req.query.name
+    }
 
-// add prefix route
-router.get('/add', (req, res) => {
-  res.render('addresses/add');
-});
+    const customerResponse = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/?limit=0`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    })
 
-// address status route
-router.get('/status', (req, res) => {
-  // TODO finish pagination work
-  // get count of addresses for pagination
-  // Address.countDocuments({type: 'Unicast'}, (err, count) => {
-  //   if (err) throw err;
-  //   const numResults = count;
-  //   // get estimated number of pages for pagination
-  //   const est = numResults / 30;
-  //   // round up to the nearest integer
-  //   const pages = Math.ceil(est);
-  // });
-  
-  // query addresses
-  Address.find({type: 'Unicast'}, {}).sort({ip: 1})
-    .then(addresses => {
-      res.render('addresses/status', {
-        address: addresses
-      });
+    const customerJson = await customerResponse.json()
+
+    let customerData = {};
+    // manipulate object data into usable format for autocomplete
+    for (let i=0; i<customerJson.count; i++) {
+      customerData[customerJson.results[i].name] = null;
+    }
+
+    const customers = JSON.stringify(customerData)
+
+    res.render('addresses/assign', {
+      sites,
+      customers,
+      selectedCustomer
     });
+  })();
 });
 
 // address detail route
-router.get('/address/:_id', (req, res) => {
-  const _id = req.params._id;
+router.get('/address/:id', (req, res) => {
+  (async () => {
+    const id = req.params.id;
 
-  // query prefix
-  Address.findOne({_id: _id}, {})
-    .then(address => {
-      res.render('addresses/address', {
-        address: address
-      });
+    // get address info
+    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${id}`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+      }
+    })
+
+    const address = await response.json()
+    const realAddress = address.address
+
+    // separate ip from cidr notation
+    const splitAddress = realAddress.split('/')
+    
+    // calculate network address
+    const addressInfo = await ip.cidrSubnet(realAddress)
+    const prefix = `${addressInfo.networkAddress}/${splitAddress[1]}`
+
+    // get gateway and subnet info
+    const getGateway = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes?prefix=${prefix}`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+      }
+    })
+
+    const getGatewayResponse = await getGateway.json()
+    const gateway = getGatewayResponse.results[0].custom_fields.gateway
+    const subnet = getGatewayResponse.results[0].custom_fields.subnet
+
+    res.render('addresses/address', {
+      address,
+      subnet,
+      gateway
     });
+  })();
 });
 
 router.post('/assign', (req, res) => {
-  const customer_name = req.body.customer;
-  const address_ip = (req.body.address) ? req.body.address : '';
-  const address_id = (req.body.addressID) ? req.body.addressID : '';
-
-  // build redirect url from headers
-  const reqLocation = req.headers.referer;
-  const reqHost = req.headers.host;
-  const reqHeader = reqLocation.split(`http://${reqHost}`);
-  const reqURL = reqHeader[1];
-
-  if (address_id != '') {
-    // request came from prefix details page assignment
-    // get customer info for IP assignment
-    Customer.findOne({name: customer_name}, {})
-      .then(customerFound => {
-        if (customerFound == null) {
-          // customer doesn't exist
-          // set cookie for toast
-          res.cookie('IPAMerStatus', 'Create Customer First');
-          // send response
-          res.redirect(reqURL);
-        } else {
-          const customer = {id: customerFound._id, name: customerFound.name};
-          if (customer_name == 'Reserved') {
-            // assign customer to IP address, and assign description
-            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active', description: 'Gateway IP'}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer assigned to IP address!
-              }
-            });
-
-            // change Gateway IP of prefix
-            Address.findOne({_id: address_id}, {})
-              .then(addressFound => {
-                const prefix = addressFound.prefix;
-                const gateway = addressFound.ip;
-                Prefix.updateOne({prefix: prefix}, {gateway: gateway}, (err, record) => {
-                  if (err) {
-                    throw err;
-                  } else {
-                    // prefix's gateway updated
-                  }
-                });
-              });
-          } else {
-            // assign customer to IP address
-            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer assigned to IP address!
-              }
-            });
-          }
-          // get IP address from _id
-          Address.findOne({_id: address_id}, {ip: 2})
-          .then(ipFound => {
-            // assign IP address to customer
-            let address = {id: address_id, ip: ipFound.ip};
-            Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer updated with IP address!
-                // set cookie for toast
-                res.cookie('IPAMerStatus', 'Address Assigned');
-                res.redirect(`/addresses/address/${ipFound._id.toString()}`);
-              }
-            });
-          });
-        }
-      });
-  } else {
-    // request came from individual customer page Assign Address button
-    // need to get address_id from address
-    Address.findOne({ip: address_ip}, {})
-    .then(ipFound => {
-      if (ipFound == null) {
-        // IP address doesn't exist
-        // set cookie for toast
-        res.cookie('IPAMerStatus', 'Create IP Address First');
-        // send response
-        res.redirect(reqURL);
-      } else {
-        // get customer info for IP assignment
-        Customer.findOne({name: customer_name}, {})
-        .then(customerFound => {
-          const customer = {id: customerFound._id, name: customerFound.name};
-
-          let address = {id: ipFound._id.toString(), ip: address_ip};
-          const address_id = ipFound._id;
-
-          // assign ip address to customer
-          Customer.updateOne({name: customer_name}, {$push: {addresses: address}}, (err, record) => {
-            if (err) {
-              throw err;
-            } else {
-              // customer updated with IP address!
-            }
-          });
-      
-          if (customer_name == 'Reserved') {
-            // assign customer to IP address, and assign description
-            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active', description: 'Gateway IP'}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer assigned to IP address!
-                res.redirect(reqURL);
-              }
-            });
-          } else {
-            // assign customer to IP address without description
-            Address.updateOne({_id: address_id}, {customer: customer, status: 'Active'}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer assigned to IP address!
-                res.redirect(reqURL);
-              }
-            });
-          }          
-        });
+  async function assignIP(addressCount, customerId, site) {
+    let ipsNeeded = parseInt(addressCount)
+    const prefixResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/?site=${site}&tag=static`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Accept': 'application/json'
       }
-    });
+    })
+
+    const prefixJson = await prefixResponse.json()
+    const numPrefixes = prefixJson.count
+
+    // find one or more prefixes with enough available IPs to fulfill request
+    let availableResponse
+    let availableJson
+    let availableIPs = 0
+    let prefixesUsed = 0
+
+    for (let i=0; i < numPrefixes; i++) {
+      // find out how many IPs are available, and number of prefixes used to fulfill request
+      availableResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
+        headers: {
+          'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+          'Accept': 'application/json'
+        }
+      })
+
+      availableJson = await availableResponse.json()
+      availableIPs += availableJson.length
+      prefixesUsed += 1
+    }
+    if (ipsNeeded <= availableIPs) {
+      // there are enough IPs to fulfill request, get available IPs and assign
+        for (let i=0; i < prefixesUsed ; i++) {
+          availableResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
+            headers: {
+              'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+              'Accept': 'application/json'
+            }
+          })
+
+          availableJson = await availableResponse.json()
+          let ipsAvailableInPrefix = availableJson.length
+          let iterations = (ipsNeeded > ipsAvailableInPrefix) ? ipsAvailableInPrefix : ipsNeeded
+          for (let j=0; j < iterations; j++) {
+            let vrf = (prefixJson.results[i].vrf === null) ? null : prefixJson.results[i].vrf.id
+            const data = {
+              address: availableJson[j].address,
+              tenant: customerId,
+              vrf
+            }
+      
+            await fetch('https://netbox.weendeavor.com/api/ipam/ip-addresses/', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+    
+          }
+
+          // subtract iterations (number of IPs we just created/assigned) from ipsNeeded to see how many more we need to create with additional prefixes
+          ipsNeeded -= iterations
+        }
+      return true
+    } else {
+      // not enough IPs available
+      return false
+    }
   }
+
+  (async () => {
+    const address_count = req.body.addressCount;
+    const name = req.body.customer;
+    const site = req.body.site.toLowerCase();
+
+    const customerResponse = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/?name=${name}`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    })
+
+    const customerJson = await customerResponse.json()
+
+    if (customerJson.count === 0) {
+      // customer does not exist, create
+      const lowerName = name.toLowerCase();
+      const slug = lowerName.replace(' ', '-');
+      const data = {
+        name,
+        slug
+      }
+
+      const response = await fetch('https://netbox.weendeavor.com/api/tenancy/tenants/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+
+      const customer = await response.json()
+
+      const assigned = await assignIP(address_count, customer.id, site)
+      if (assigned) {
+        res.cookie('IPAMerStatus', 'IP Assigned!');
+        res.redirect(`/customers/customer/${customer.id}`)
+      } else {
+        res.cookie('IPAMerStatus', 'Not Enough IPs Available');
+        res.redirect('/addresses/assign');
+      }
+    } else {
+      // customer exists, find an available IP and assign
+      const assigned = await assignIP(address_count, customerJson.results[0].id, site)
+      if (assigned) {
+        res.cookie('IPAMerStatus', 'IP Assigned!');
+        res.redirect(`/customers/customer/${customerJson.results[0].id}`);
+      } else {
+        res.cookie('IPAMerStatus', 'Not Enough IPs Available');
+        res.redirect('/addresses/assign');
+      }
+    }
+  })();
 });
 
-router.post('/unassign', (req, res) => {
-  const customer = req.body.uncustomer;
-  const addressID = req.body.unaddressID;
-  const addressIP = req.body.unaddressIP;
-  const removeAddress = {id: addressID, ip: addressIP};
+router.post('/', (req, res) => {
+  (async () => {
+    const id = req.body.unaddressID;
 
-  // build redirect url from headers
-  const reqLocation = req.headers.referer;
-  const reqHost = req.headers.host;
-  const reqHeader = reqLocation.split(`http://${reqHost}`);
-  const reqURL = reqHeader[1];
-  
-  // unassign customer from IP address
-  const clearCustomer = {id: '', name: ''};
-  Address.updateOne({_id: addressID}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
-    if (err) {
-      throw err;
-    } else {
-      // customer unassigned from IP address!
-    }
-  });
+    // build redirect url from headers
+    const reqLocation = req.headers.referer;
+    const reqHost = req.headers.host;
+    const reqHeader = reqLocation.split(`http://${reqHost}`);
+    const reqURL = reqHeader[1];
+    
+    // delete address from netbox
+    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+      }
+    })
 
-  Customer.updateOne({name: customer}, {$pull: {addresses: removeAddress}}, (err, record) => {
-    if (err) {
-      throw err;
-    } else {
-      // customer updated with IP address!
+    if (response.status === 204) {
       // set cookie for toast
       res.cookie('IPAMerStatus', 'Address Unassigned');
       res.redirect(reqURL);
+    } else {
+      console.log(response)
     }
-  });
-
-  if (customer == 'Reserved') {
-    // change Gateway IP of prefix
-    Address.findOne({_id: addressID}, {})
-    .then(addressFound => {
-      const prefix = addressFound.prefix;
-      Prefix.updateOne({prefix: prefix}, {gateway: ''}, (err, record) => {
-        if (err) {
-          throw err;
-        } else {
-          // prefix's gateway cleared
-        }
-      });
-    });
-  }
+  })();
 });
 
 // process address edit form
 router.post('/edit', (req, res) => {
-  const addressID = req.body.addressID;
-  const addressDesc = req.body.addressDescription;
+  (async () => {
+    const addressID = req.body.addressID;
+    const address = req.body.address;
+    const description = req.body.addressDescription;
 
-  // build redirect url from headers
-  const reqLocation = req.headers.referer;
-  const reqHost = req.headers.host;
-  const reqHeader = reqLocation.split(`http://${reqHost}`);
-  const reqURL = reqHeader[1];
+    // build redirect url from headers
+    const reqLocation = req.headers.referer;
+    const reqHost = req.headers.host;
+    const reqHeader = reqLocation.split(`http://${reqHost}`);
+    const reqURL = reqHeader[1];
 
-  Address.updateOne({_id: addressID}, {description: addressDesc})
-    .then(ok => {res.redirect(reqURL);});
-});
-
-// process address delete form
-router.post('/delete', (req, res) => {
-  const addressIP = req.body.addressIP;
-
-  // build redirect url from headers
-  const reqHost = req.headers.host;
-  const reqURL = `http://${reqHost}/prefixes/status`;
-  
-  // get customer ID and addresses from customer name
-  Address.findOne({ip: addressIP}, {})
-    .then(addressFound => {
-      if ((addressFound.customer.id != '') && (addressFound.customer.name != '')) {
-        // a customer is assigned, remove address from customer
-        // find customer and remove address
-        let removeAddress = {id: addressFound._id.toString, ip: addressFound.ip};
-        let customerID = String(addressFound.customer.id);
-        Customer.updateOne({_id: customerID}, {$pull: {addresses: removeAddress}}, (err, record) => {
-          if (err) {
-            throw err;
-          } else {
-            // address removed from customer!
-          }
-        });
-      }
-
-      //remove address
-      Address.deleteOne({_id: addressFound._id}, (err) => {
-        if (err) {
-          throw err;
-        } else {
-          // address deleted!
-          // set cookie for toast
-          res.cookie('IPAMerStatus', 'Address Deleted');
-          res.redirect(reqURL);
-        }
-      });
-    });
-});
-
-// process address creation form
-router.post('/add', (req, res) => {
-  const prefix = req.body.prefix;
-  const address = req.body.address;
-  const customer = req.body.customer;
-  let customerIsValid = true;
-
-  // validate prefix
-  const prefixIsValid = validatePrefix(prefix);
-
-  if (prefixIsValid) {
-
-  // get values for site, subnet and gateway from database, because if the form fields are disabled, they won't be submitted in the post
-  Prefix.findOne({prefix: prefix}, {gateway: 4, subnet: 5, site: 8})
-    .then(prefixFound => {
-      let gateway = prefixFound.gateway;
-      let subnet = prefixFound.subnet;
-      let site = prefixFound.site;
-      
-      // get these manually typed in values from the form, if they were submitted
-      if (req.body.site) {
-        site = req.body.site;
-      }
-      if (req.body.subnet) {
-        subnet = req.body.subnet;
-      }
-
-      // define regular expressions for validating gateways
-      const v4AddrRE = /((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])(\/([1-9]|[1-2][0-9]|3[0-1]))?$/;
-      const v6AddrRE = /(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/;
-
-      // ##### BEGIN ADDRESS FORM PROCESSING #####
-      const addressIsValid = validateAddress(address, prefix);
-      const siteIsValid = validateSite();
-      if (customer !== "") {
-        customerIsValid = validateCustomer(customer);
-      }
-      const cidrSubnetMatches = validateCIDRMatches(subnet);
-
-      if (addressIsValid && siteIsValid && customerIsValid && cidrSubnetMatches) {  
-        createAddress(gateway, subnet, site);
-      }
-
-      function validateCustomer(customer) {
-        // TODO check if customer exists, if not send error
-        const customerExists = Customer.findOne({name: customer}, {_id: 0})
-          .then((customerFound) => {
-            if (customerFound) {
-              return true;
-            } else {
-              let message = 'Customer doesn\'t exist';
-              // send response
-              res.render('addresses/add', {
-                error_msg: message,
-                prefix: req.body.prefix,
-                address: req.body.address,
-                customer: req.body.customer,
-                gateway: gateway,
-                subnet: subnet,
-                site: site,
-                description: req.body.description
-              });
-              return false;
-            }
-          });
-        return customerExists;
-      }
-
-      function validateAddress(address, prefix) {
-        let addressValid = false;
-        let addressMember = false;
-        let addressDuplicate = false;
-      
-        if ( !(v4AddrRE.test(address) || v6AddrRE.test(address)) ) {
-          // address is invalid, keep addressValid = false
-        } else {
-          // address is valid IP address, continue testing
-          addressValid = true;
-      
-          // validate that ip address is a member of chosen prefix
-          if (ip.cidrSubnet(prefix).contains(address)) {
-            // ip address is part of prefix
-            addressMember = true;
-          } else {
-            // address is not a member of prefix, keep addressMember = false
-          }
-
-          // check if IP already exists
-          Address.findOne({ip: address}, {})
-            .then(addressFound => {
-              if (addressFound != null) {
-                // address exists!
-                addressDuplicate = true;
-              }
-            });
-        }
-        if (!addressValid) {
-          // invalid address given
-          let message = 'Not a valid IPv4 or IPv6 Address';
-          // send response
-          res.render('addresses/add', {
-            error_msg: message,
-            prefix: req.body.prefix,
-            address: req.body.address,
-            customer: req.body.customer,
-            gateway: gateway,
-            subnet: subnet,
-            site: site,
-            description: req.body.description
-          });
-          return false;
-        } else if (!addressMember) {
-          // ip address not member of prefix
-          let message = 'IP Address is not a member of Prefix';
-          // send response
-          res.render('addresses/add', {
-            error_msg: message,
-            prefix: req.body.prefix,
-            address: req.body.address,
-            customer: req.body.customer,
-            gateway: gateway,
-            subnet: subnet,
-            site: site,
-            description: req.body.description
-          });
-          return false;
-        } else if (addressDuplicate) {
-          // ip address is a duplicate
-          let message = 'IP Address already exists';
-          // send response
-          res.render('addresses/add', {
-            error_msg: message,
-            prefix: req.body.prefix,
-            address: req.body.address,
-            customer: req.body.customer,
-            gateway: gateway,
-            subnet: subnet,
-            site: site,
-            description: req.body.description
-          });
-          return false;
-        } else {
-          // address is valid and a part of the prefix
-          return true;
-        }
-      }
-
-      function validateSite() {
-        if (site !== null) {
-          // Check if typed in site matches an existing site
-          const siteExists = Site.findOne({name: new RegExp('\\b' + site + '\\b', 'i')})
-          .then(site => {
-            if(site !== null) {
-              // site exists
-              return true;
-            } else {
-              // doesn't match existing site
-              let message = 'Site Doesn\'t Exist. Please select an available site or create a new one';
-              // send response
-              res.render('addresses/add', {
-                error_msg: message,
-                prefix: req.body.prefix,
-                address: req.body.address,
-                customer: req.body.customer,
-                gateway: gateway,
-                subnet: subnet,
-                site: site,
-                description: req.body.description
-              });
-              return false;
-            }
-          });
-          return siteExists;
-        } else {
-          // site not defined in form, continue
-          return true;
-        }
-      }
-
-      function getCIDR(prefix) {
-        // replace CIDR / with . to prepare for array
-        let modPrefix = prefix.replace("/", ".");
-
-        // create netblock array
-        let cidr = modPrefix.split(".");
-
-        // get CIDR from netblock array
-        cidr.splice(0,4);
-
-        return cidr;
-      }
-
-      function validateCIDRMatches(subnet) {
-        // if subnet is filled in, validate that it matches CIDR in prefix
-        if (subnet !== '') {
-          // subnet was defined in form
-
-          const cidr = parseInt(getCIDR(req.body.prefix));
-          const sub = subnet;
-          // create subnet array
-          let subnetArray = sub.split(".");
-
-          // calculate number of bits that subnet represents
-          let bits = 0;
-          subnetArray.forEach((mask) => {
-            mask = parseInt(mask);
-            switch(mask) {
-              case 255:
-                bits += 8;
-                break;
-              case 254:
-                bits += 7;
-                break;
-              case 252:
-                bits += 6;
-                break;
-              case 248:
-                bits += 5;
-                break;
-              case 240:
-                bits += 4;
-                break;
-              case 224:
-                bits += 3;
-                break;
-              case 192:
-                bits += 2;
-                break;
-              case 128:
-                bits += 1;
-                break;
-              default:
-                  break;
-            }
-            return bits;
-          });
-
-          if (cidr !== bits) {
-            // don't match, send error
-            let message = 'CIDR and subnet don\'t match';
-            // send response
-            res.render('addresses/add', {
-              error_msg: message,
-              prefix: req.body.prefix,
-              address: req.body.address,
-              customer: req.body.customer,
-              gateway: gateway,
-              subnet: subnet,
-              site: site,
-              description: req.body.description
-            });
-            return false;
-          } else {
-            // cidr and bits match, continue validations
-            return true;
-          }
-        } else {
-          // subnet not defined, continue validations
-          return true;
-        }
-      }
-
-      function createAddress(gateway, subnet, site) {
-        let status = 'Available';
-        let customer = {id: '', name: ''};
-
-        // if customer is being assigned
-        if (req.body.customer !== "") {
-          status = 'Active';
-          Customer.findOne({name: req.body.customer}, {})
-            .then(customerFound => {
-              customer = {id: customerFound._id.toString(), name: customerFound.name};
-              const newAddress = new Address({
-                ip: req.body.address,
-                type: 'Unicast',
-                customer: customer,
-                prefix: req.body.prefix,
-                gateway: gateway,
-                subnet: subnet,
-                site: site,
-                status: status,
-                description: req.body.description
-              });
-      
-              newAddress.save()
-                .then(savedAddress => {
-                  if (customer.id !== "") {
-                    let addressCreated = {id: savedAddress._id.toString(), ip: savedAddress.ip};
-                    // assign IP address to customer
-                    Customer.updateOne({name: customer.name}, {$push: {addresses: addressCreated}}, (err, record) => {
-                      if (err) {
-                        throw err;
-                      } else {
-                        // customer updated with IP address!
-                        res.render('addresses/add', {
-                          success_msg: `Address ${savedAddress.ip} created and assigned!`
-                        });
-                      }
-                    });
-                  } else {
-                    // send success message
-                    res.render('addresses/add', {
-                      success_msg: `Address ${savedAddress.ip} added!`
-                    });
-                  }
-                })
-                .catch(err => {
-                  res.render('addresses/add', {
-                    error_msg: `Failed to add address. Error is ${err}`
-                  });
-                });
-            });
-        } else {
-          // no customer being assigned, just create address
-          const newAddress = new Address({
-            ip: req.body.address,
-            type: 'Unicast',
-            customer: customer,
-            prefix: req.body.prefix,
-            gateway: gateway,
-            subnet: subnet,
-            site: site,
-            status: status,
-            description: req.body.description
-          });
-  
-          newAddress.save()
-            .then(savedAddress => {
-              if (customer.id !== "") {
-                let addressCreated = {id: savedAddress._id, ip: savedAddress.ip};
-                // assign IP address to customer
-                Customer.updateOne({name: customer.name}, {$push: {addresses: addressCreated}}, (err, record) => {
-                  if (err) {
-                    throw err;
-                  } else {
-                    // customer updated with IP address!
-                    res.render('addresses/add', {
-                      success_msg: `Address ${savedAddress.ip} created and assigned!`
-                    });
-                  }
-                });
-              } else {
-                // send success message
-                res.render('addresses/add', {
-                  success_msg: `Address ${savedAddress.ip} added!`
-                });
-              }
-            })
-            .catch(err => {
-              res.render('addresses/add', {
-                error_msg: `Failed to add address. Error is ${err}`
-              });
-            });
-        }
-        
-        
-      }
-    });
-  }
-
-  function validatePrefix(prefix) {
-    // define regular expressions for validating prefixes
-    const v4PreRE = /((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])(\/([1-9]|[1-2][0-9]|3[0-1]))?$/;
-    const v6PreRE = /(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|[fF][eE]80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))/;
-
-    if ( !(v4PreRE.test(prefix) || v6PreRE.test(prefix)) ) {
-      // invalid prefix given
-      let message = 'Not a valid IPv4 or IPv6 Prefix';
-        // send response and set checked for dhcp radio button
-        res.render('addresses/add', {
-          error_msg: message,
-          prefix: req.body.prefix,
-          address: req.body.address,
-          customer: req.body.customer,
-          gateway: gateway,
-          subnet: subnet,
-          site: site,
-          description: req.body.description
-        });
-        return false;
-    } else {
-      // prefix is valid IPv4 or IPv6
-      return true;
+    // TODO send request to netbox
+    const data = {
+      address,
+      description
     }
-  }
+
+    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${addressID}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    const changed = await response.json()
+    if (changed.id) {
+      // set cookie for toast
+      res.cookie('IPAMerStatus', 'Address Updated');
+      res.redirect(reqURL);
+    } else {
+      console.log(response)
+    }
+  })();
 });
 
 module.exports = router;

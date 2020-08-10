@@ -1,13 +1,37 @@
 <div class="container">
   <h4>Results</h4>
+  <div class="right mb-3">
+    {{#if sites.previous}}
+      <a href="" class="btn pagination" id="{{sites.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if sites.next}}
+      <a href="" class="btn pagination" id="{{sites.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
+  </div>
   <div class="row mt-4">
     <div class="col s12 no-padding">
-      {{#if result}}
-        {{#each result}}
-          <a href="{{host}}/customers/customer/{{this._id}}"><h5>{{this.name}}</h5></a>
+      {{#if sites.results}}
+        {{#each sites.results}}
+          <a href="{{host}}/customers/customer/{{this.id}}"><h5>{{this.name}}</h5></a>
         {{/each}}
       {{else}}<h5>No Customers Found</h5>
       {{/if}}
     </div>
+  </div>
+  <div class="right mb-3">
+    {{#if sites.previous}}
+      <a href="" class="btn pagination" id="{{sites.previous}}"><i class="material-icons">navigate_before</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_before</i></a>
+    {{/if}}
+    {{#if sites.next}}
+      <a href="" class="btn pagination" id="{{sites.next}}"><i class="material-icons">navigate_next</i></a>
+    {{else}}
+      <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
+    {{/if}}
   </div>
 </div>

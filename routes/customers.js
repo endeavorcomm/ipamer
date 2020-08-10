@@ -2,12 +2,6 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch')
 
-// load customer model
-Customer = require('../models/Customer');
-
-// load address model
-Address = require('../models/Address');
-
 // add customer route
 router.get('/add', (req, res) => {
   res.render('customers/add');
@@ -21,9 +15,9 @@ router.get('/status', (req, res) => {
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     if (limit && offset) {
-      url = `https://netbox.weendeavor.com/api/tenancy/tenants?limit=${limit}&offset=${offset}`
+      url = `https://netbox.weendeavor.com/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
     } else {
-      url = 'https://netbox.weendeavor.com/api/tenancy/tenants'
+      url = 'https://netbox.weendeavor.com/api/tenancy/tenants/'
     }
     const response = await fetch(url, {
       headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
@@ -38,6 +32,7 @@ router.get('/status', (req, res) => {
 
 // customer detail route
 router.get('/customer/:id', (req, res) => {
+  // TODO if customer has no IPs assigned, pass in the tenant name
   (async () => {
     let url
     const id = req.params.id;
@@ -48,62 +43,55 @@ router.get('/customer/:id', (req, res) => {
     } else {
       url = `https://netbox.weendeavor.com/api/ipam/ip-addresses/?tenant_id=${id}`
     }
-    const response = await fetch(url, {
+    const addressFetch = await fetch(url, {
       headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
     })
     
-    const addresses = await response.json()
+    const addresses = await addressFetch.json()
+
+    const customerFetch = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/${id}`, {
+      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    })
+    
+    const customer = await customerFetch.json()
+
     res.render('customers/customer', {
-      address: addresses
+      addresses,
+      customer
     })
   })();
 });
 
-// process address creation form
+// process customer creation form
 router.post('/add', (req, res) => {
-  const name = req.body.name;
-  const description = req.body.description;
-
-  // check if customer already exists
-  Customer.findOne({name: name}, {name: 1, _id: 0})
-    .then(customerFound => {
-      if (customerFound) {
-        // customer exists, send alert
-        let message = 'Customer Already Exists';
-        // send response
-        res.render('customers/add', {
-          error_msg: message,
-          name: req.body.name,
-          description: req.body.description
-        });
-        return false;
-      } else {
-        // customer doesn't exist, continue validations
-        createCustomer(name, description);
-      }
-    });
-
-    function createCustomer(name, description) {
-      const newCustomer = new Customer({
-        name: name,
-        description: description
-      });
-
-      newCustomer.save()
-        .then(customer => {
-          // customer created!
-          res.render('customers/add', {
-            success_msg: `Customer ${name} created!`
-          });
-          return true;
-        })
-        .catch(err => {
-          req.flash('error_msg', `Failed to create customer. Error is ${err}`);
-          res.render('customers/add');
-          return;
-        });
+  (async () => {
+    const name = req.body.name;
+    const description = req.body.description;
+    const lowerName = name.toLowerCase();
+    const slug = lowerName.replace(' ', '-');
+    const data = {
+      name,
+      slug,
+      description
     }
 
+    const response = await fetch('https://netbox.weendeavor.com/api/tenancy/tenants/', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+
+    const customer = await response.json()
+    if (customer.name[0] === 'tenant with this name already exists.') {
+      req.flash('error_msg', 'Customer already exists.');
+      res.redirect('/customers/add');
+    } else {
+      res.redirect(`customer/${customer.id}`)
+    }
+  })();
 });
 
 // process customer edit form
@@ -117,58 +105,60 @@ router.post('/edit', (req, res) => {
   const reqHost = req.headers.host;
   const reqHeader = reqLocation.split(`http://${reqHost}`);
   const reqURL = reqHeader[1];
-
-  Customer.updateOne({_id: customerID}, {name: customerName, description: customerDesc})
-    .then(ok => {
-      // update any IPs that are assigned to the customer
-      Address.updateMany({'customer.id': customerID}, {'customer.name': customerName})
-        .then(updated => {
-          res.redirect(reqURL);
-        });
-    });
 });
 
 // process customer delete form
 router.post('/delete', (req, res) => {
-  const customerName = req.body.customerName;
+  (async () => {
+    const id = req.body.customerId;
 
-  // build redirect url from headers
-  const reqHost = req.headers.host;
-  const reqURL = `http://${reqHost}/customers/status`;
-  
-  // get customer ID and addresses from customer name
-  Customer.findOne({name: customerName}, {})
-    .then(customerFound => {
-      let customerID = String(customerFound._id);
-      const customer = {id: customerID, name: customerFound.name};
-      // unassign all addresses from the customer
-      Address.find({customer: customer}, {})
-        .then(addressesFound => {
-          addressesFound.forEach((address) => {
-            // remove customer from address, reset status and clear description
-            const clearCustomer = {id: '', name: ''};
-            Address.updateOne({_id: address._id}, {customer: clearCustomer, status: 'Available', description: ''}, (err, record) => {
-              if (err) {
-                throw err;
-              } else {
-                // customer removed from address!
-              }
-            });
-          });
-        });
+    // build redirect url from headers
+    const reqHost = req.headers.host;
+    const reqURL = `http://${reqHost}/customers/status/`;
 
-      //remove customer
-      Customer.deleteOne({_id: customerFound._id}, (err) => {
-        if (err) {
-          throw err;
-        } else {
-          // customer deleted!
-          // set cookie for toast
-          res.cookie('IPAMerStatus', 'Customer Deleted');
-          res.redirect(reqURL);
+    // get all IPs assigned to customer
+    const getTenantIps = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/?tenant_id=${id}`, {
+      headers: {
+        'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+      }
+    })
+
+    const ipResponse = await getTenantIps.json()
+    const ips = ipResponse.results
+    const ipsDeleted = await ips.forEach(ip => {
+      fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${ip.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${process.env.NETBOX_API_KEY}`
         }
-      });
-    });
+      })
+    })
+
+    if (ipsDeleted === undefined) {
+      const response = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+        }
+      })
+
+      if (response.status === 204) {
+        //set cookie for toast
+        res.cookie('IPAMerStatus', 'Customer Deleted');
+        res.redirect(reqURL);
+      } else {
+        const err = await response.json()
+        console.log(err)
+        res.cookie('IPAMerStatus', 'Error deleting customer.');
+        res.redirect(req.headers.referer);
+      }
+    } else {
+      const err = await ipsDeleted.json()
+      console.log(err)
+        res.cookie('IPAMerStatus', 'Error deleting customer IPs.');
+        res.redirect(req.headers.referer);
+    }
+  })();
 });
 
 module.exports = router;

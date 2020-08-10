@@ -4,34 +4,13 @@ document.addEventListener('DOMContentLoaded', function() {
   var tooltips = document.querySelectorAll('.tooltipped');
   M.Tooltip.init(tooltips);
 
-  // initialize address-assign IP field autocomplete
-  var ipAuto = document.getElementById('customer-address');
-  M.Autocomplete.init(ipAuto);
-
-  // add event listener to assign address cancel button
-  const assignIPCancel = document.getElementById('assignIPCancel');
-  assignIPCancel.addEventListener('click', function(e) {
-    document.getElementById('assign-address').style.display = 'none';
-  });
-
   // add event listener to address-unassign cancel button
   const unassignCustomerCancel = document.getElementById('unassignCustomerCancel');
   unassignCustomerCancel.addEventListener('click', function(e) {
     document.getElementById('unassign-address').style.display = 'none';
   });
 
-  // add event listenters to assign address button
-  document.getElementById('assignCustomerBtn').addEventListener('click', function(e){
-    const customerName = document.querySelector('.customerName').innerHTML;
-    document.getElementById('customer').value = customerName;
-
-    // show the popup box
-    document.getElementById('assign-address').style.display = 'block';
-
-    e.preventDefault();
-  });
-
-  // add event listenter to delete customer button
+  // add event listener to delete customer button
   document.getElementById('deleteCustomerBtn').addEventListener('click', function(e){
 
     // show the popup box
@@ -78,30 +57,4 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
     });
   });
-
-  // create ajax request and get a list of IPs when assigning to a customer
-  var xhrIP = new XMLHttpRequest();
-  xhrIP.open('GET', '/getAvailAddresses', true);
-  xhrIP.send();
-  xhrIP.onreadystatechange = () => {
-    if (xhrIP.readyState === 4) {
-      if (xhrIP.status === 200) {
-        // convert response string into an object
-        var responseIP = JSON.parse(xhrIP.responseText);
-
-        // manipulate object data into usable format for autocomplete
-        var ips = {};
-        for (var i=0; i<responseIP.length; i++) {
-          // take IP address and convert it to a key, with null as the value
-          ips[responseIP[i].ip] = null;
-        }
-
-        // update autocomplete data
-        let ipInstance = M.Autocomplete.getInstance(ipAuto);
-        ipInstance.updateData(ips);
-      } else {
-        console.log('Error with ajax request');
-      }
-    }
-  };
 });
