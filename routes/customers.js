@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch')
-const host = `${process.env.HOST}`
+const host = process.env.HOST
 
 // add customer route
 router.get('/add', (req, res) => {

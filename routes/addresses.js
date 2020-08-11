@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ip = require('ip');
 const fetch = require('node-fetch');
-const host = `${process.env.HOST}`
+const host = process.env.HOST
 
 // assign address route
 router.get('/assign', (req, res) => {
