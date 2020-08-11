@@ -15,9 +15,9 @@ router.get('/status', (req, res) => {
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     if (limit && offset) {
-      url = `${process.env.HOST}api/tenancy/tenants/?limit=${limit}&offset=${offset}`
+      url = `https://netbox.weendeavor.com/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
     } else {
-      url = `${process.env.HOST}api/tenancy/tenants/`
+      url = `https://netbox.weendeavor.com/api/tenancy/tenants/`
     }
     const response = await fetch(url, {
       headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
