@@ -55,11 +55,11 @@
       <form class="container" action="/customers/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="customerName" id="customerName" value="{{customer.name}}">
+            <input type="text" name="customerName" id="customerName" placeholder="{{customer.name}}">
             <label for="customerName">Name</label>
           </div>
           <div class="input-field">
-            <input type="text" name="customerDescription" id="customerDescription" value="{{customer.description}}">
+            <input type="text" name="customerDescription" id="customerDescription" placeholder="{{customer.description}}">
             <label for="customerDescription">Description</label>
           </div>
           <input type="hidden" name="customerID" id="customerID" value="{{customer.id}}">

@@ -97,26 +97,31 @@ router.post('/add', (req, res) => {
 // process customer edit form
 router.post('/edit', (req, res) => {
   (async () => {
-    const id = req.body.customerID;
-    const name = req.body.customerName;
-    const lowerName = name.toLowerCase();
-    const slug = lowerName.replace(' ', '-');
-    const description = req.body.customerDescription;
-
     // build redirect url from headers
     const reqLocation = req.headers.referer;
     const reqHost = req.headers.host;
     const reqHeader = reqLocation.split(`http://${reqHost}`);
     const reqURL = reqHeader[1];
 
+    const id = req.body.customerID;
+    let name
+    let description
+
+    if (req.body.customerName !== '') {
+      name = req.body.customerName;
+    }
+    
+    if (req.body.customerDescription !== '') {
+      description = req.body.customerDescription;
+    }
+
     const data = {
       name,
-      slug,
       description
     }
 
     const response = await fetch(`${host}/api/tenancy/tenants/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
         'Content-Type': 'application/json'
@@ -129,7 +134,7 @@ router.post('/edit', (req, res) => {
       res.redirect(`customer/${customer.id}`)
     } else {
       req.flash('error_msg', 'Customer already exists.');
-      res.redirect('/customers/add');
+      res.redirect(reqURL);
     }
   })();
 });

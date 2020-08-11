@@ -9,7 +9,7 @@
       <form class="container" action="/addresses/edit" method="POST" class="col">
         <div class="row">
           <div class="input-field">
-            <input type="text" name="addressDescription" id="addressDescription" value="{{address.description}}" autofocus>
+            <input type="text" name="addressDescription" id="addressDescription" placeholder="{{address.description}}" autofocus>
             <label for="addressDescription">Description</label>
           </div>
           <input type="hidden" name="addressID" id="addressID" value="{{address.id}}">
