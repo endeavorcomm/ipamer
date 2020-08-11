@@ -40,6 +40,10 @@ td {
   font-size: 1rem;
 }
 
+.hidden {
+  display: none;
+}
+
 .input-group {
   display: inline-table;
 }

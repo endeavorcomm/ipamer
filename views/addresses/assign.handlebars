@@ -25,7 +25,7 @@
         </div>
       </div>
     </div>
-
+    <h5 class="hidden mt-4 mb-4" id="whileWait">Creating IPs...</h5>
     <div style="overflow:auto;">
       <div>
         <button class="btn" type="button" id="prevBtn" onclick="nextPrev(-1)">Previous</button>
@@ -92,6 +92,7 @@
     if (currentTab >= x.length) {
       //...the form gets submitted:
       document.getElementById("assignAddressForm").submit();
+      document.getElementById("whileWait").style.display = "block";
       return false;
     }
     // Otherwise, display the correct tab:

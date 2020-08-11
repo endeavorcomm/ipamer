@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const ip = require('ip');
 const fetch = require('node-fetch');
+const host = `${process.env.HOST}`
 
-// add address route
+// assign address route
 router.get('/assign', (req, res) => {
   (async () => {
-    const siteResponse = await fetch(`https://netbox.weendeavor.com/api/dcim/sites/`, {
+    const siteResponse = await fetch(`${host}/api/dcim/sites/`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
         'Accept': 'application/json'
@@ -27,7 +28,8 @@ router.get('/assign', (req, res) => {
       selectedCustomer = req.query.name
     }
 
-    const customerResponse = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/?limit=0`, {
+    // pass in limit=0 so that all customers will be returned, instead of only the first 50
+    const customerResponse = await fetch(`${host}/api/tenancy/tenants/?limit=0`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
         'Accept': 'application/json'
@@ -58,7 +60,7 @@ router.get('/address/:id', (req, res) => {
     const id = req.params.id;
 
     // get address info
-    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${id}`, {
+    const response = await fetch(`${host}/api/ipam/ip-addresses/${id}`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`
       }
@@ -75,7 +77,7 @@ router.get('/address/:id', (req, res) => {
     const prefix = `${addressInfo.networkAddress}/${splitAddress[1]}`
 
     // get gateway and subnet info
-    const getGateway = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes?prefix=${prefix}`, {
+    const getGateway = await fetch(`${host}/api/ipam/prefixes?prefix=${prefix}`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`
       }
@@ -96,7 +98,9 @@ router.get('/address/:id', (req, res) => {
 router.post('/assign', (req, res) => {
   async function assignIP(addressCount, customerId, site) {
     let ipsNeeded = parseInt(addressCount)
-    const prefixResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/?site=${site}&tag=static`, {
+
+    // find prefixes for site that have a tag of static
+    const prefixResponse = await fetch(`${host}/api/ipam/prefixes/?site=${site}&tag=static`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
         'Accept': 'application/json'
@@ -104,17 +108,17 @@ router.post('/assign', (req, res) => {
     })
 
     const prefixJson = await prefixResponse.json()
+    // get number of prefixes, so that we can use all of them if needed
     const numPrefixes = prefixJson.count
-
-    // find one or more prefixes with enough available IPs to fulfill request
     let availableResponse
     let availableJson
     let availableIPs = 0
-    let prefixesUsed = 0
 
+    // find one or more prefixes with enough available IPs to fulfill request
     for (let i=0; i < numPrefixes; i++) {
-      // find out how many IPs are available, and number of prefixes used to fulfill request
-      availableResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
+
+      // find out how many IPs are available for the current prefix
+      availableResponse = await fetch(`${host}/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
         headers: {
           'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
           'Accept': 'application/json'
@@ -122,13 +126,15 @@ router.post('/assign', (req, res) => {
       })
 
       availableJson = await availableResponse.json()
+      // ips available in this prefix
       availableIPs += availableJson.length
-      prefixesUsed += 1
+      // keep track of the number of prefixes (duplicate to numPrefixes??)
     }
     if (ipsNeeded <= availableIPs) {
       // there are enough IPs to fulfill request, get available IPs and assign
-        for (let i=0; i < prefixesUsed ; i++) {
-          availableResponse = await fetch(`https://netbox.weendeavor.com/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
+        //for (let i=0; i < prefixesUsed ; i++) {
+        for (let i=0; i < numPrefixes ; i++) {
+          availableResponse = await fetch(`${host}/api/ipam/prefixes/${prefixJson.results[i].id}/available-ips`, {
             headers: {
               'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
               'Accept': 'application/json'
@@ -146,7 +152,7 @@ router.post('/assign', (req, res) => {
               vrf
             }
       
-            await fetch('https://netbox.weendeavor.com/api/ipam/ip-addresses/', {
+            await fetch(`${host}/api/ipam/ip-addresses/`, {
               method: 'POST',
               headers: {
                 'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
@@ -172,7 +178,7 @@ router.post('/assign', (req, res) => {
     const name = req.body.customer;
     const site = req.body.site.toLowerCase();
 
-    const customerResponse = await fetch(`https://netbox.weendeavor.com/api/tenancy/tenants/?name=${name}`, {
+    const customerResponse = await fetch(`${host}/api/tenancy/tenants/?name=${name}`, {
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
         'Accept': 'application/json'
@@ -190,7 +196,7 @@ router.post('/assign', (req, res) => {
         slug
       }
 
-      const response = await fetch('https://netbox.weendeavor.com/api/tenancy/tenants/', {
+      const response = await fetch(`${host}/api/tenancy/tenants/`, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
@@ -234,7 +240,7 @@ router.post('/', (req, res) => {
     const reqURL = reqHeader[1];
     
     // delete address from netbox
-    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${id}`, {
+    const response = await fetch(`${host}/api/ipam/ip-addresses/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`
@@ -270,7 +276,7 @@ router.post('/edit', (req, res) => {
       description
     }
 
-    const response = await fetch(`https://netbox.weendeavor.com/api/ipam/ip-addresses/${addressID}`, {
+    const response = await fetch(`${host}/api/ipam/ip-addresses/${addressID}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
