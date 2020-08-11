@@ -32,10 +32,6 @@ td {
   border-color: #c3e6cb;
 }
 
-.fab-label {
-  color: black;
-}
-
 .formLabel {
   font-size: 1rem;
 }
@@ -200,34 +196,6 @@ td {
 
 #butInstall {
   display: none;
-}
-
-#fabAddressLabel {
-  position: relative;
-  left: -53px;
-  top: 32px;
-  font-size: 1em;
-}
-
-#fabCustomerLabel {
-  position: relative;
-  left: -63px;
-  top: 32px;
-  font-size: 1em;
-}
-
-#fabPrefixLabel {
-  position: relative;
-  left: -45px;
-  top: 32px;
-  font-size: 1em;
-}
-
-#fabSiteLabel {
-  position: relative;
-  left: -39px;
-  top: 32px;
-  font-size: 1em;
 }
 
 #info_msg {

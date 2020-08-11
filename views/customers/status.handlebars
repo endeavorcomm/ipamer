@@ -20,13 +20,12 @@
             <th>Name</th>
             <th>Description</th>
             <th># of IPs</th>
-            <th># of Prefixes</th>
           </tr>
         </thead>
         <tbody>
           {{#each customer.results}}
           <tr>
-            <td><a href="/customers/customer/{{this.id}}">{{this.name}}</a></td><td>{{this.description}}</td><td>{{this.ipaddress_count}}</td><td>{{this.prefix_count}}</td>
+            <td><a href="/customers/customer/{{this.id}}">{{this.name}}</a></td><td>{{this.description}}</td><td>{{this.ipaddress_count}}</td>
           </tr>
           {{/each}}
         </tbody>
