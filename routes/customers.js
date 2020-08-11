@@ -22,8 +22,9 @@ router.get('/status', (req, res) => {
     const response = await fetch(url, {
       headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
     })
-    
+    console.log(response)
     const tenants = await response.json()
+    console.log(tenants)
     res.render('customers/status', {
       customer: tenants
     })
