@@ -89,5 +89,5 @@ app.use('/addresses', addresses);
 app.use('/customers', customers);
 
 server.listen(NODE_PORT, () => {
-  console.log(`Server Listening on Port ${HOST}...`);
+  console.log(`Server Listening on Port ${NETBOX_HOST}...`);
 });
