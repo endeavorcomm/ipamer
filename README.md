@@ -1,9 +1,7 @@
 # IP Address ManagER
-IPAMER was created to help an ISP manage the assignment of static IP addresses for customers. It's built for front-line people who may have little or no knowledge of IPs, subnet masks, gateways, prefixes, etc.
+IPAMer was created to help ISPs manage the assignment of static IP addresses for customers. It's built for front-line people who may or may not have technical knowledge of IPs, subnet masks, gateways, prefixes, etc.
 
-IPAMER is tightly integrated with the NetBox API - thus https://github.com/netbox-community/netbox is a prerequisite of using IPAMER.
-
-
+IPAMer is tightly integrated with the NetBox API, and assumes NetBox is the "source of truth" for your IP prefixes and addresses.
 
 
 # Requirements and IPAMer Install
@@ -35,11 +33,7 @@ IPAMER is tightly integrated with the NetBox API - thus https://github.com/netbo
     [Install]
     WantedBy=multi-user.target
 
-#### Finish service setup
-    sudo systemctl daemon-reload
-    sudo systemctl enable ipamer.service
-    sudo systemctl start ipamer.service
-
+#### Create environment file
     sudo nano /opt/ipamer/.env
 
 #### Add the following into the .env file, where HOST is the FQDN http(s) of your NetBox site. save and exit file
@@ -49,19 +43,22 @@ IPAMER is tightly integrated with the NetBox API - thus https://github.com/netbo
 
 IPAMer listens on port 8080 by default
 
-
+#### Finish service setup
+    sudo systemctl daemon-reload
+    sudo systemctl enable ipamer.service
+    sudo systemctl start ipamer.service
 
 
 # NetBox Setup
 
-- configure Site(s), Prefix(es), Address(es) in NetBox
 - create an API key for an admin user in NetBox
 - create a custom field called 'Subnet'
 - create a custom field called 'Gateway'
 - create a tag called 'static'
+- configure, at a minimum, your Site(s), Prefix(es), Address(es) in NetBox
 
-#### NetBox prefixes must have these attributes, in order to be used by IPAMer. See below image for example.
-- A Site assigned
+#### NetBox prefixes must meet these requirements in order to be used by IPAMer. See below image for example.
+- Site assigned
 - Custom field 'Subnet' filled out
 - Custom field 'Gateway' filled out
 - Tag of 'static'
@@ -69,12 +66,8 @@ IPAMer listens on port 8080 by default
 ![Prefix Example](./prefix.gif)
 
 
-
-
 # Contributing
 Please create an issue first, then ask that the issue be assigned to you.
-
-
 
 
 # About
