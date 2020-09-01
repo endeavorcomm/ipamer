@@ -36,7 +36,7 @@ IPAMer is tightly integrated with the NetBox API, and assumes NetBox is the "sou
 #### Create environment file
     sudo nano /opt/ipamer/.env
 
-#### Add the following into the .env file, where HOST is the FQDN http(s) of your NetBox site. save and exit file
+#### Add the following into the .env file, where HOST is the FQDN http(s) of your NetBox site, save and exit file
     NETBOX_API_KEY=
     NETBOX_HOST=
     NODE_PORT=
@@ -67,7 +67,7 @@ IPAMer listens on port 8080 by default
 
 
 # Contributing
-Please create an issue first, then ask that the issue be assigned to you.
+Use the dev branch for contributing. Please create an issue first, then ask that the issue be assigned to you.
 
 
 # About
