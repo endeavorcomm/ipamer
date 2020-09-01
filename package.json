@@ -1,7 +1,7 @@
 {
   "name": "ipamer",
-  "version": "1.1.0",
-  "description": "Easily Track and Assign IP Addresses",
+  "version": "2.0.0",
+  "description": "Easily Track Customer Static IP Addresses",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"

@@ -9,7 +9,9 @@ const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
-const host = `${process.env.HOST}`
+const NETBOX_API_KEY = process.env.NETBOX_API_KEY
+const NETBOX_HOST = process.env.NETBOX_HOST
+const NODE_PORT = process.env.NODE_PORT || 8080
 
 // link to static public files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -59,16 +61,16 @@ app.get('/search', (req, res) => {
     const offset = req.query.offset ? req.query.offset : false
     const name = req.query.name__ic ? req.query.name__ic : false
     if (limit && offset && name) {
-      url = `${host}/api/tenancy/tenants/?limit=${limit}&name__ic=${name}&offset=${offset}`
+      url = `${NETBOX_HOST}/api/tenancy/tenants/?limit=${limit}&name__ic=${name}&offset=${offset}`
     } else if (limit && offset) {
-      url = `${host}/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
+      url = `${NETBOX_HOST}/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
     } else if (name) {
-      url = `${host}/api/tenancy/tenants/?name__ic=${name}`
+      url = `${NETBOX_HOST}/api/tenancy/tenants/?name__ic=${name}`
     } else {
-      url = '${host}/api/tenancy/tenants/'
+      url = `${NETBOX_HOST}/api/tenancy/tenants/`
     }
     const response = await fetch(url, {
-      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+      headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
     })
     
     const sites = await response.json()
@@ -86,6 +88,6 @@ const customers = require('./routes/customers');
 app.use('/addresses', addresses);
 app.use('/customers', customers);
 
-server.listen(8080, () => {
-  console.log('Server Listening on Port 8080...');
+server.listen(NODE_PORT, () => {
+  console.log(`Server Listening on Port ${HOST}...`);
 });
