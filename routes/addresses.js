@@ -100,8 +100,8 @@ router.post('/assign', (req, res) => {
   async function assignIP(addressCount, customerId, site) {
     let ipsNeeded = parseInt(addressCount)
 
-    // find prefixes for site that have a tag of static
-    const prefixResponse = await fetch(`${NETBOX_HOST}/api/ipam/prefixes/?site=${site}&tag=static`, {
+    // find prefixes for site that have a tag of ipamer_static
+    const prefixResponse = await fetch(`${NETBOX_HOST}/api/ipam/prefixes/?site=${site}&tag=ipamer_static`, {
       headers: {
         'Authorization': `Token ${NETBOX_API_KEY}`,
         'Accept': 'application/json'
