@@ -235,7 +235,7 @@ router.post('/', (req, res) => {
     // build redirect url from headers
     const reqLocation = req.headers.referer;
     const reqHost = req.headers.host;
-    const reqHeader = reqLocation.split(`http://${reqHost}`);
+    const reqHeader = reqLocation.split(`${reqHost}/`);
     const reqURL = reqHeader[1];
     
     // delete address from netbox
@@ -266,7 +266,7 @@ router.post('/edit', (req, res) => {
     // build redirect url from headers
     const reqLocation = req.headers.referer;
     const reqHost = req.headers.host;
-    const reqHeader = reqLocation.split(`http://${reqHost}`);
+    const reqHeader = reqLocation.split(`${reqHost}/`);
     const reqURL = reqHeader[1];
 
     // TODO send request to netbox
