@@ -101,7 +101,7 @@ router.post('/edit', (req, res) => {
     // build redirect url from headers
     const reqLocation = req.headers.referer;
     const reqHost = req.headers.host;
-    const reqHeader = reqLocation.split(`http://${reqHost}`);
+    const reqHeader = reqLocation.split(`${reqHost}/`);
     const reqURL = reqHeader[1];
 
     const id = req.body.customerID;
@@ -145,10 +145,6 @@ router.post('/delete', (req, res) => {
   (async () => {
     const id = req.body.customerId;
 
-    // build redirect url from headers
-    const reqHost = req.headers.host;
-    const reqURL = `http://${reqHost}/customers/status/`;
-
     // get all IPs assigned to customer
     const getTenantIps = await fetch(`${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}`, {
       headers: {
@@ -187,7 +183,7 @@ router.post('/delete', (req, res) => {
       if (response.status === 204) {
         //set cookie for toast
         res.cookie('IPAMerStatus', 'Customer Deleted');
-        res.redirect(reqURL);
+        res.redirect('/');
       } else {
         const err = await response.json()
         console.log(err)

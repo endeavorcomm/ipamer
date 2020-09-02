@@ -65,6 +65,10 @@ IPAMer listens on port 8080 by default
 
 ![Prefix Example](./prefix.gif)
 
+# IPAMer Workflow
+1. If desired, create a customer first by clicking the 'CREATE CUSTOMER' button on the main page - but this is strictly optional. The only advantage is that you can also assign a description to the customer right now. This can always be done afterwards as well.
+2. Click the 'ASSIGN IP ADDRESS' button on the main page.
+3. Follow prompts
 
 # Contributing
 Use the dev branch for contributing. Please create an issue first, then ask that the issue be assigned to you.
