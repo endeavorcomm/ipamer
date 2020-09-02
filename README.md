@@ -12,7 +12,7 @@ IPAMer is tightly integrated with the NetBox API, and assumes NetBox is the "sou
 ## These install steps assume you're using an Ubuntu distro - adjust accordingly
     sudo adduser ipamer
     cd /opt
-    sudo git clone https://github.com/weendeavor/ipamer.git
+    sudo git clone https://github.com/endeavorcomm/ipamer.git
     cd ipamer
     sudo npm install
     sudo apt install nano
