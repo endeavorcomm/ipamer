@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch')
-const host = process.env.HOST
+const NETBOX_API_KEY = process.env.NETBOX_API_KEY
+const NETBOX_HOST = process.env.NETBOX_HOST
 
 // add customer route
 router.get('/add', (req, res) => {
@@ -16,12 +17,12 @@ router.get('/status', (req, res) => {
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     if (limit && offset) {
-      url = `${host}/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
+      url = `${NETBOX_HOST}/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
     } else {
-      url = `${host}/api/tenancy/tenants/`
+      url = `${NETBOX_HOST}/api/tenancy/tenants/`
     }
     const response = await fetch(url, {
-      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+      headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
     })
     
     const tenants = await response.json()
@@ -39,18 +40,18 @@ router.get('/customer/:id', (req, res) => {
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     if (limit && offset) {
-      url = `${host}/api/ipam/ip-addresses/?tenant_id=${id}&limit=${limit}&offset=${offset}`
+      url = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}&limit=${limit}&offset=${offset}`
     } else {
-      url = `${host}/api/ipam/ip-addresses/?tenant_id=${id}`
+      url = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}`
     }
     const addressFetch = await fetch(url, {
-      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+      headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
     })
     
     const addresses = await addressFetch.json()
 
-    const customerFetch = await fetch(`${host}/api/tenancy/tenants/${id}`, {
-      headers: {'Authorization': `Token ${process.env.NETBOX_API_KEY}`}
+    const customerFetch = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/${id}`, {
+      headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
     })
     
     const customer = await customerFetch.json()
@@ -75,10 +76,10 @@ router.post('/add', (req, res) => {
       description
     }
 
-    const response = await fetch(`${host}/api/tenancy/tenants/`, {
+    const response = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Authorization': `Token ${NETBOX_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
@@ -120,10 +121,10 @@ router.post('/edit', (req, res) => {
       description
     }
 
-    const response = await fetch(`${host}/api/tenancy/tenants/${id}`, {
+    const response = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/${id}`, {
       method: 'PATCH',
       headers: {
-        'Authorization': `Token ${process.env.NETBOX_API_KEY}`,
+        'Authorization': `Token ${NETBOX_API_KEY}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
@@ -149,9 +150,9 @@ router.post('/delete', (req, res) => {
     const reqURL = `http://${reqHost}/customers/status/`;
 
     // get all IPs assigned to customer
-    const getTenantIps = await fetch(`${host}/api/ipam/ip-addresses/?tenant_id=${id}`, {
+    const getTenantIps = await fetch(`${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}`, {
       headers: {
-        'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+        'Authorization': `Token ${NETBOX_API_KEY}`
       }
     })
 
@@ -161,10 +162,10 @@ router.post('/delete', (req, res) => {
     const deleteIps = async (ips) => {
       const results = []
       for (const ip of ips) {
-        const response = await fetch(`${host}/api/ipam/ip-addresses/${ip.id}`, {
+        const response = await fetch(`${NETBOX_HOST}/api/ipam/ip-addresses/${ip.id}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+            'Authorization': `Token ${NETBOX_API_KEY}`
           }
         })
         results.push(response.status)
@@ -176,10 +177,10 @@ router.post('/delete', (req, res) => {
       res.cookie('IPAMerStatus', 'Error deleting customer IPs.');
       res.redirect(req.headers.referer);
     } else {
-      const response = await fetch(`${host}/api/tenancy/tenants/${id}`, {
+      const response = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Token ${process.env.NETBOX_API_KEY}`
+          'Authorization': `Token ${NETBOX_API_KEY}`
         }
       })
 
