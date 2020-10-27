@@ -189,7 +189,8 @@ router.post('/assign', (req, res) => {
     if (customerJson.count === 0) {
       // customer does not exist, create
       const lowerName = name.toLowerCase();
-      const slug = lowerName.replace(' ', '-');
+      const matchSpaces = /\s+/gi;
+      const slug = lowerName.replace(matchSpaces, '-');
       const data = {
         name,
         slug
@@ -206,15 +207,19 @@ router.post('/assign', (req, res) => {
 
       const customer = await response.json()
 
-      console.log(customer);
-
-      const assigned = await assignIP(address_count, customer.id, site)
-      if (assigned) {
-        res.cookie('IPAMerStatus', 'IP Assigned!');
-        res.redirect(`/customers/customer/${customer.id}`)
+      if (customer.id) {
+        // customer created!
+        const assigned = await assignIP(address_count, customer.id, site)
+        if (assigned) {
+          res.cookie('IPAMerStatus', 'IP Assigned!');
+          res.redirect(`/customers/customer/${customer.id}`)
+        } else {
+          res.cookie('IPAMerStatus', 'Not Enough IPs Available');
+          res.redirect('/addresses/assign');
+        }
       } else {
-        res.cookie('IPAMerStatus', 'Not Enough IPs Available');
-        res.redirect('/addresses/assign');
+        // log response
+        console.log(customer);
       }
     } else {
       // customer exists, find an available IP and assign
