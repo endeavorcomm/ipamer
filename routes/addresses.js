@@ -220,6 +220,8 @@ router.post('/assign', (req, res) => {
       } else {
         // log response
         console.log(customer);
+        res.cookie('IPAMerStatus', customer);
+        res.redirect('/addresses/assign');
       }
     } else {
       // customer exists, find an available IP and assign
