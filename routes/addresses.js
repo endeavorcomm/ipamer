@@ -206,6 +206,8 @@ router.post('/assign', (req, res) => {
 
       const customer = await response.json()
 
+      console.log(customer);
+
       const assigned = await assignIP(address_count, customer.id, site)
       if (assigned) {
         res.cookie('IPAMerStatus', 'IP Assigned!');
