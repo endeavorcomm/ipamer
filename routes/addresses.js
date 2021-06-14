@@ -297,7 +297,7 @@ router.post('/edit', (req, res) => {
     if (changed.id) {
       // set cookie for toast
       res.cookie('IPAMerStatus', 'Address Updated');
-      res.redirect(reqURL);
+      res.redirect(`address/${changed.id}`);
     } else {
       console.log(response)
     }
