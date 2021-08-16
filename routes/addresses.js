@@ -189,8 +189,9 @@ router.post('/assign', (req, res) => {
     if (customerJson.count === 0) {
       // customer does not exist, create
       const lowerName = name.toLowerCase();
-      const spaceAndAmpersand = /\s+&/gi;
+      const spaceAndAmpersand = /\s+|&/gi;
       const slug = lowerName.replace(spaceAndAmpersand, '-');
+      console.log('slug is', slug);
       const data = {
         name,
         slug
