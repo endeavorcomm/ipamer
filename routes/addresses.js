@@ -190,7 +190,9 @@ router.post('/assign', (req, res) => {
       // customer does not exist, create
       const lowerName = name.toLowerCase();
       const spaceAndAmpersand = /\s+|&/gi;
-      const slug = lowerName.replace(spaceAndAmpersand, '-');
+      const consecHyphens = /-+/gi;
+      const initSlug = lowerName.replace(spaceAndAmpersand, '-');
+      const slug = initSlug.replace(consecHyphens, '-');
       console.log('slug is', slug);
       const data = {
         name,
