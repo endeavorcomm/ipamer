@@ -35,20 +35,32 @@ router.get('/status', (req, res) => {
 // customer detail route
 router.get('/customer/:id', (req, res) => {
   (async () => {
-    let url
+    let addressesURL, prefixesURL
     const id = req.params.id;
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     if (limit && offset) {
-      url = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}&limit=${limit}&offset=${offset}`
+      addressesURL = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}&limit=${limit}&offset=${offset}`
     } else {
-      url = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}`
+      addressesURL = `${NETBOX_HOST}/api/ipam/ip-addresses/?tenant_id=${id}`
     }
-    const addressFetch = await fetch(url, {
+    const addressFetch = await fetch(addressesURL, {
       headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
     })
     
     const addresses = await addressFetch.json()
+
+    prefixesURL = `${NETBOX_HOST}/api/ipam/prefixes/?tenant_id=${id}`
+
+    const prefixFetch = await fetch(prefixesURL, {
+      headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
+    })
+
+    let prefixes = await prefixFetch.json()
+
+    if (JSON.stringify(prefixes.results) === '[]') {
+      prefixes = false
+    }
 
     const customerFetch = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/${id}`, {
       headers: {'Authorization': `Token ${NETBOX_API_KEY}`}
@@ -58,6 +70,7 @@ router.get('/customer/:id', (req, res) => {
 
     res.render('customers/customer', {
       addresses,
+      prefixes,
       customer
     })
   })();

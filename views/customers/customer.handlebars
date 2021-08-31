@@ -18,6 +18,32 @@
       <a href="" class="btn disabled"><i class="material-icons">navigate_next</i></a>
     {{/if}}
   </div>
+  {{#if prefixes}}
+  <div class="row mt-4">
+    <div class="col s12 no-padding">
+      <table>
+        <thead class="grey lighten-3">
+          <tr>
+            <th>Prefix</th>
+            <th>Description</th>
+            <th>Subnet</th>
+            <th>Gateway</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each prefixes.results}}
+          <tr>
+            <td>{{this.prefix}}</td>
+            <td>{{this.description}}</td>
+            <td>{{this.custom_fields.subnet}}</td>
+            <td>{{this.custom_fields.gateway}}</td>
+          </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {{/if}}
   <div class="row mt-4">
     <div class="col s12 no-padding">
       <table id="theTable">
