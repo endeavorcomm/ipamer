@@ -8,50 +8,68 @@ const NETBOX_HOST = process.env.NETBOX_HOST
 // assign address route
 router.get('/assign', (req, res) => {
   (async () => {
-    const siteResponse = await fetch(`${NETBOX_HOST}/api/dcim/sites/`, {
-      headers: {
-        'Authorization': `Token ${NETBOX_API_KEY}`,
-        'Accept': 'application/json'
+    let sites = new Set()
+
+    const filterPrefixes = (results) => {
+      const hasTag = results.filter(prefix => prefix.tags.some((tag) => tag.name === 'ipamer_static'))
+      for (i=0; i < hasTag.length; i++) {
+        sites.add(hasTag[i].site.name)
       }
-    })
 
-    const siteJson = await siteResponse.json()
-
-    // manipulate object data into usable format for autocomplete
-    let sites = [];
-    for (var i=0; i<siteJson.count; i++) {
-      sites.push(siteJson.results[i].name)
+      sites = [...sites].sort()
     }
 
-    let selectedCustomer
-    if (req.query.name) {
-      // customer name was included in url, prepopulate customer value of form with this data
-      selectedCustomer = req.query.name
-    }
-
-    // pass in limit=0 so that all customers will be returned, instead of only the first 50
-    const customerResponse = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/?limit=0`, {
-      headers: {
-        'Authorization': `Token ${NETBOX_API_KEY}`,
-        'Accept': 'application/json'
+    const getPrefix = async (url, results = []) => {
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': `Token ${NETBOX_API_KEY}`,
+          'Accept': 'application/json'
+        }
+      })
+      const json = await res.json()
+      let all = json.results.concat(results)
+      const next = json.next
+      if (next) {
+        await getPrefix(next, all)
+      } else {
+        filterPrefixes(all)
       }
-    })
-
-    const customerJson = await customerResponse.json()
-
-    let customerData = {};
-    // manipulate object data into usable format for autocomplete
-    for (let i=0; i<customerJson.count; i++) {
-      customerData[customerJson.results[i].name] = null;
     }
 
-    const customers = JSON.stringify(customerData)
+    // initial prefix fetch
+    await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/`)
 
-    res.render('addresses/assign', {
-      sites,
-      customers,
-      selectedCustomer
-    });
+
+      let selectedCustomer
+      if (req.query.name) {
+        // customer name was included in url, prepopulate customer value of form with this data
+        selectedCustomer = req.query.name
+      }
+
+      // pass in limit=0 so that all customers will be returned, instead of only the first 50
+      const customerResponse = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/?limit=0`, {
+        headers: {
+          'Authorization': `Token ${NETBOX_API_KEY}`,
+          'Accept': 'application/json'
+        }
+      })
+
+      const customerJson = await customerResponse.json()
+
+      let customerData = {};
+      // manipulate object data into usable format for autocomplete
+      for (let i=0; i<customerJson.count; i++) {
+        customerData[customerJson.results[i].name] = null;
+      }
+
+      const customers = JSON.stringify(customerData)
+
+      res.render('addresses/assign', {
+        sites,
+        customers,
+        selectedCustomer
+      });
+
   })();
 });
 
