@@ -10,10 +10,17 @@ router.get('/assign', (req, res) => {
   (async () => {
     let sites = new Set()
 
-    const filterPrefixes = (results) => {
+    const filterPrefixes = async (results) => {
       const hasTag = results.filter(prefix => prefix.tags.some((tag) => tag.name === 'ipamer_static'))
       for (i=0; i < hasTag.length; i++) {
-        sites.add(hasTag[i].site.name)
+        const res = await fetch(`${NETBOX_HOST}/api/dcim/sites/${hasTag[i].site.id}/`, {
+          headers: {
+            'Authorization': `Token ${NETBOX_API_KEY}`,
+            'Accept': 'application/json'
+          }
+        })
+        const json = await res.json()
+        sites.add(json.description)
       }
 
       sites = [...sites].sort()
@@ -32,44 +39,42 @@ router.get('/assign', (req, res) => {
       if (next) {
         await getPrefix(next, all)
       } else {
-        filterPrefixes(all)
+        await filterPrefixes(all)
       }
     }
 
     // initial prefix fetch
     await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/`)
 
+    let selectedCustomer
+    if (req.query.name) {
+      // customer name was included in url, prepopulate customer value of form with this data
+      selectedCustomer = req.query.name
+    }
 
-      let selectedCustomer
-      if (req.query.name) {
-        // customer name was included in url, prepopulate customer value of form with this data
-        selectedCustomer = req.query.name
+    // pass in limit=0 so that all customers will be returned, instead of only the first 50
+    const customerResponse = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/?limit=0`, {
+      headers: {
+        'Authorization': `Token ${NETBOX_API_KEY}`,
+        'Accept': 'application/json'
       }
+    })
 
-      // pass in limit=0 so that all customers will be returned, instead of only the first 50
-      const customerResponse = await fetch(`${NETBOX_HOST}/api/tenancy/tenants/?limit=0`, {
-        headers: {
-          'Authorization': `Token ${NETBOX_API_KEY}`,
-          'Accept': 'application/json'
-        }
-      })
+    const customerJson = await customerResponse.json()
 
-      const customerJson = await customerResponse.json()
+    let customerData = {};
+    // manipulate object data into usable format for autocomplete
+    for (let i=0; i<customerJson.count; i++) {
+      customerData[customerJson.results[i].name] = null;
+    }
 
-      let customerData = {};
-      // manipulate object data into usable format for autocomplete
-      for (let i=0; i<customerJson.count; i++) {
-        customerData[customerJson.results[i].name] = null;
-      }
+    const customers = JSON.stringify(customerData)
 
-      const customers = JSON.stringify(customerData)
-
-      res.render('addresses/assign', {
-        sites,
-        customers,
-        selectedCustomer
-      });
-
+    res.render('addresses/assign', {
+      sites,
+      customers,
+      selectedCustomer
+    });
   })();
 });
 
