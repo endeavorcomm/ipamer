@@ -10,7 +10,7 @@
         <div class="input-field col s2">
           <select name="site" id="site">
             {{#each sites}}
-              <option value="{{this}}">{{this}}</option>
+              <option value="{{this.id}}">{{this.description}}</option>
             {{/each}}
           </select>
           <label for="site">Which Site?</label>

@@ -8,22 +8,37 @@ const NETBOX_HOST = process.env.NETBOX_HOST
 // assign address route
 router.get('/assign', (req, res) => {
   (async () => {
-    let sites = new Set()
+    let selectedCustomer, sites = [], candidate_ids = new Set(), candidate_descriptions = new Set()
 
     const filterPrefixes = async (results) => {
-      const hasTag = results.filter(prefix => prefix.tags.some((tag) => tag.name === 'ipamer_static'))
-      for (i=0; i < hasTag.length; i++) {
-        const res = await fetch(`${NETBOX_HOST}/api/dcim/sites/${hasTag[i].site.id}/`, {
+      //const hasTag = results.filter(prefix => prefix.tags.some((tag) => tag.name === 'ipamer_static'))
+      for (i=0; i < results.length; i++) {
+        const res = await fetch(`${NETBOX_HOST}/api/dcim/sites/${results[i].site.id}/`, {
           headers: {
             'Authorization': `Token ${NETBOX_API_KEY}`,
             'Accept': 'application/json'
           }
         })
         const json = await res.json()
-        sites.add(json.description)
+
+        candidate_ids.add(json.id)
+        candidate_descriptions.add(json.description)
       }
 
-      sites = [...sites].sort()
+      /* convert Sets to Arrays */
+      candidate_descriptions = [...candidate_descriptions]
+      candidate_ids = [...candidate_ids]
+
+      for (s=0; s < candidate_ids.length; s++) {
+        sites.push({ id: candidate_ids[s], description: candidate_descriptions[s] })
+      }
+
+      sites.sort((a, b) => {
+        let a_prop = a.description, b_prop = b.description
+        if (a_prop < b_prop) return -1
+        if (a_prop > b_prop) return 1
+        return 0
+      })
     }
 
     const getPrefix = async (url, results = []) => {
@@ -44,9 +59,8 @@ router.get('/assign', (req, res) => {
     }
 
     // initial prefix fetch
-    await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/`)
+    await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/?limit=10&tag=ipamer_static`)
 
-    let selectedCustomer
     if (req.query.name) {
       // customer name was included in url, prepopulate customer value of form with this data
       selectedCustomer = req.query.name
@@ -124,7 +138,7 @@ router.post('/assign', (req, res) => {
     let ipsNeeded = parseInt(addressCount)
 
     // find prefixes for site that have a tag of ipamer_static
-    const prefixResponse = await fetch(`${NETBOX_HOST}/api/ipam/prefixes/?site=${site}&tag=ipamer_static`, {
+    const prefixResponse = await fetch(`${NETBOX_HOST}/api/ipam/prefixes/?site_id=${site}&tag=ipamer_static`, {
       headers: {
         'Authorization': `Token ${NETBOX_API_KEY}`,
         'Accept': 'application/json'
