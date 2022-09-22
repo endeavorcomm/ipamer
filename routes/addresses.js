@@ -11,7 +11,6 @@ router.get('/assign', (req, res) => {
     let selectedCustomer, sites = [], candidate_ids = new Set(), candidate_descriptions = new Set()
 
     const filterPrefixes = async (results) => {
-      //const hasTag = results.filter(prefix => prefix.tags.some((tag) => tag.name === 'ipamer_static'))
       for (i=0; i < results.length; i++) {
         const res = await fetch(`${NETBOX_HOST}/api/dcim/sites/${results[i].site.id}/`, {
           headers: {
@@ -59,7 +58,7 @@ router.get('/assign', (req, res) => {
     }
 
     // initial prefix fetch
-    await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/?limit=10&tag=ipamer_static`)
+    await getPrefix(`${NETBOX_HOST}/api/ipam/prefixes/?tag=ipamer_static`)
 
     if (req.query.name) {
       // customer name was included in url, prepopulate customer value of form with this data
