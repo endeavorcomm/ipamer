@@ -1,6 +1,6 @@
 {
   "name": "ipamer",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A frontend ipam web app, to easily allocate customer static IPs for a NetBox backend.",
   "keywords": [
     "ipam",
