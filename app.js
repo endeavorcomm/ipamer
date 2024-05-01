@@ -12,6 +12,7 @@ const fetch = require('node-fetch');
 const NETBOX_API_KEY = process.env.NETBOX_API_KEY
 const NETBOX_HOST = process.env.NETBOX_HOST
 const NODE_PORT = process.env.NODE_PORT || 8080
+const ip = require('ip')
 
 // link to static public files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -57,17 +58,58 @@ app.get('/', (req, res) => {
 app.get('/search', (req, res) => {
   (async () => {
     let url
+    let cidr
+    let api_path = '/api/tenancy/tenants'
     const limit = req.query.limit ? req.query.limit : false
     const offset = req.query.offset ? req.query.offset : false
     const name = req.query.name__ic ? req.query.name__ic : false
+
+    /* Check if searching for an IP. */
+    const ip_regex =  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+    const is_ip = ip_regex.test(name)
+
+    if (is_ip) {
+      api_path = '/api/ipam/ip-addresses'
+
+      /* Check if IP falls within a used prefix. */
+      try {
+        const prefix_res = await fetch(`${NETBOX_HOST}/api/ipam/prefixes?limit=0&family_label__ic=IPv4`, {
+          headers: {
+            'Authorization': `Token ${NETBOX_API_KEY}`,
+            'Accept': 'application/json'
+          }
+        })
+
+        if (prefix_res.status !== 200) throw new Error(`Error getting prefixes from Netbox: ${prefix_res.status}, ${prefix_res.statusText}`)
+
+        const prefixes = await prefix_res.json()
+        
+        prefixes.results.forEach((p) => {
+          if(p.family.value === 4 && ip.cidrSubnet(p.prefix).contains(name)) {
+            /* Get number of bits for IP. */
+            cidr = p.prefix.split('/')[1]
+            return
+          }
+        })
+      } catch (error) {
+        throw new Error(error.message)
+      } finally {
+        if (!cidr) {
+          res.render('search', { sites: {} })
+        }
+      }
+    }
+
+    const term = is_ip ? `${name}/${cidr}` : name
+    
     if (limit && offset && name) {
-      url = `${NETBOX_HOST}/api/tenancy/tenants/?limit=${limit}&name__ic=${name}&offset=${offset}`
+      url = `${NETBOX_HOST}${api_path}/?limit=${limit}&${is_ip ? 'address' : 'name__ic'}=${term}&offset=${offset}`
     } else if (limit && offset) {
-      url = `${NETBOX_HOST}/api/tenancy/tenants/?limit=${limit}&offset=${offset}`
+      url = `${NETBOX_HOST}${api_path}/?limit=${limit}&offset=${offset}`
     } else if (name) {
-      url = `${NETBOX_HOST}/api/tenancy/tenants/?name__ic=${name}`
+      url = `${NETBOX_HOST}${api_path}/?${is_ip ? 'address' : 'name__ic'}=${term}`
     } else {
-      url = `${NETBOX_HOST}/api/tenancy/tenants/`
+      url = `${NETBOX_HOST}${api_path}/`
     }
     const response = await fetch(url, {
       headers: {'Authorization': `Token ${NETBOX_API_KEY}`}

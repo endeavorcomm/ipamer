@@ -16,9 +16,14 @@
     <div class="col s12 no-padding">
       {{#if sites.results}}
         {{#each sites.results}}
-          <a href="{{host}}/customers/customer/{{this.id}}"><h5>{{this.name}}</h5></a>
+          {{#if this.name}}
+            <a href="{{host}}/customers/customer/{{this.id}}"><h5>{{this.name}}</h5></a>
+          {{/if}}
+          {{#if this.tenant.name}}
+            <a href="{{host}}/customers/customer/{{this.tenant.id}}"><h5>{{this.tenant.name}}</h5></a>
+          {{/if}}
         {{/each}}
-      {{else}}<h5>No Customers Found</h5>
+      {{else}}<h5>Nothing Found</h5>
       {{/if}}
     </div>
   </div>
