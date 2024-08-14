@@ -1,3 +1,6 @@
+# Deprecation Notice
+This repo has been archived, and is no longer maintained.
+
 # IP Address ManagER
 IPAMer was created to help ISPs manage the assignment of static IP addresses for customers. It's built for front-line people who may or may not have technical knowledge of IPs, subnet masks, gateways, prefixes, etc.
 
